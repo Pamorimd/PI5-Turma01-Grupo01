@@ -1,7 +1,7 @@
-{% comment %} {% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Login - QuickFix{% endblock %}
+{% block title %}Login - Goodfilms{% endblock %}
 
 {% block sidebar %}{% endblock %} {# ← isso remove a sidebar #}
 
@@ -85,13 +85,12 @@
     margin-top: 10px;
   }
 </style>
-</style>
 {% endblock %}
 
 {% block content %}
 <div class="login-wrapper">
   <div class="login-container">
-    <h2>Entrar no QuickFix</h2>
+    <h2>Entrar no Goodfilms</h2>
     <form method="POST">
       {% csrf_token %}
       <input type="text" name="username" class="form-control" placeholder="Usuário" required>
@@ -117,4 +116,4 @@
     </form>
   </div>
 </div>
-{% endblock %} {% endcomment %}
+{% endblock %}

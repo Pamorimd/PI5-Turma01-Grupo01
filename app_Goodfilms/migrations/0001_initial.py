@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 ('data_criacao', models.DateTimeField(auto_now_add=True)),
                 ('client', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='avaliacao_feitas', to=settings.AUTH_USER_MODEL)),
                 ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='avaliacoes_recebidas', to=settings.AUTH_USER_MODEL)),
-                ('servico', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='avaliacoes', to='app_QuickFix.servico')),
+                ('servico', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='avaliacoes', to='app_Goodfilms.servico')),
             ],
             options={
                 'db_table': 'Servico_avaliacao',
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('data_criacao', models.DateTimeField(auto_now_add=True)),
-                ('servico', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='contratados', to='app_QuickFix.servico')),
+                ('servico', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='contratados', to='app_Goodfilms.servico')),
                 ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='servicos_contratados', to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('data_criacao', models.DateTimeField(auto_now_add=True)),
-                ('servico', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favoritos', to='app_QuickFix.servico')),
+                ('servico', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favoritos', to='app_Goodfilms.servico')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='servicos_favoritos', to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
                 ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
                 ('data_criacao', models.DateTimeField(auto_now_add=True)),
                 ('client', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='visualizado', to=settings.AUTH_USER_MODEL)),
-                ('servico', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visualicacoes', to='app_QuickFix.servico')),
+                ('servico', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visualicacoes', to='app_Goodfilms.servico')),
             ],
             options={
                 'db_table': 'Servico_visualizacao',
