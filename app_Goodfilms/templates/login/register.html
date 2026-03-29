@@ -1,72 +1,147 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Cadastro</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #f9f9f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+{% extends "base.html" %}
+{% load static %}
 
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            width: 350px;
-        }
+{% block title %}Cadastro - GoodFilms{% endblock %}
 
-        .container h2 {
-            margin-bottom: 20px;
-            text-align: center;
-        }
+{% block sidebar %}{% endblock %}
 
-        input, button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
+{% block extra_head %}
+<style>
+.main-content {
+    margin-left: 0 !important;
+    padding: 0;
+    min-height: 100vh;
+    background: linear-gradient(to right, #1e3c72, #2a5298) !important;
+}
 
-        button {
-            background-color: #2e4da4;
-            color: white;
-            border: none;
-            font-weight: bold;
-        }
+body {
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    font-family: Arial, sans-serif;
+}
 
-        a {
-            display: block;
-            margin-top: 15px;
-            text-align: center;
-            color: #333;
-            text-decoration: none;
-        }
+.register-box {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
 
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Cadastre-se</h2>
-        <form method="post">
+.register-card {
+    width: 100%;
+    max-width: 380px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 35px 30px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.10);
+}
+
+.register-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.register-card .form-control {
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 15px;
+    border: 1px solid #e5e7eb;
+}
+
+.register-card .form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.15);
+}
+
+.btn-cadastro {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    background: #ffc107;
+    color: #212529;
+    transition: 0.25s ease;
+}
+
+.btn-cadastro:hover {
+    background: #e0a800;
+    color: #fff;
+}
+
+.link-login {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+
+.link-login a {
+    color: #ffc107;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.link-login a:hover {
+    text-decoration: underline;
+}
+
+.alert-danger {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-box">
+    <div class="register-card">
+        <h2>Cadastre-se no GoodFilms</h2>
+
+        <form method="POST">
             {% csrf_token %}
-            <input type="text" name="username" placeholder="Usuario" required>
-            <input type="password" name="senha" placeholder="Senha" required>
-            <input type="password" name="senha_confirmada" placeholder="Confirmar Senha" required>
-            <!-- <input type="text" name="cidade" placeholder="Cidade"> --> 
-            <!-- <input type="text" name="estado" placeholder="Estado"> -->
+
+            <input
+                type="text"
+                name="username"
+                class="form-control"
+                placeholder="Usuário"
+                required
+            >
+
+            <input
+                type="password"
+                name="senha"
+                class="form-control"
+                placeholder="Senha"
+                required
+            >
+
+            <input
+                type="password"
+                name="senha_confirmada"
+                class="form-control"
+                placeholder="Confirmar senha"
+                required
+            >
+
             {% if form_err %}
-            <div class="alert alert-danger mt-2">{{ form_err }}</div>
+                <div class="alert alert-danger">
+                    {{ form_err }}
+                </div>
             {% endif %}
-            <button type="submit">Cadastrar</button>
+
+            <button type="submit" class="btn btn-cadastro">
+                Cadastrar
+            </button>
+
+            <div class="link-login">
+                Já tem conta?
+                <a href="{% url 'login' %}">Fazer login</a>
+            </div>
         </form>
-        <a href="{% url 'login' %}">Deseja fazer Login??</a>
     </div>
-</body>
-</html> 
+</div>
+{% endblock %}
