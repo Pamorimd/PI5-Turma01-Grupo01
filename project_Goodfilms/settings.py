@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',  # ✅ ESSENCIAL: mapeia seus modelos para uso interno
     'django.contrib.sessions',      # ✅ ESSENCIAL: armazena sessões (como login)
     'widget_tweaks',                # ✅ Para estilizar os widgets do Django (ex: campos de formulário)
-    'app_QuickFix',
+    'app_Goodfilms',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'project_QuickFix.urls'
+ROOT_URLCONF = 'project_Goodfilms.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project_QuickFix.wsgi.application'
+WSGI_APPLICATION = 'project_Goodfilms.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -128,7 +128,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'app_QuickFix.CustomUser'
+AUTH_USER_MODEL = 'app_Goodfilms.CustomUser'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

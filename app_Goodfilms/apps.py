@@ -3,9 +3,9 @@ from django.apps import AppConfig
 from django.conf import settings
 
 from django_master_sync import sync_db
-class AppQuickfixConfig(AppConfig):
+class AppGoodfilmsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app_QuickFix'
+    name = 'app_Goodfilms'
 
     def ready(self):
         from django.db.models.signals import post_migrate
