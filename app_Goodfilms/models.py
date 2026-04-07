@@ -1,222 +1,157 @@
-
-#! Biblitecas do Django
+#! Bibliotecas do Django
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-#! Biblitecas do Python
-import uuid # Para gerar _id únicos
-
-#! Não esquecer para manipular os ForeignKey, tem que mapear tbm no "mysql_sync.py"
+#! Bibliotecas do Python
+import uuid 
 
 # ----------------------------
-# Modelo de Usuário Customizado
+# Modelo de Usuário Customizado (Mantido)
 # ----------------------------
-class CustomUserManager(BaseUserManager): # Atenticação de usuário customizada
+class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
         if not username:
             raise ValueError("O campo 'username' é obrigatório.")
         user = self.model(username=username, **extra_fields)
-        user.set_password(password)  # ← gera hash de forma segura
+        user.set_password(password)
         user.save()
         return user
 
-class CustomUser(AbstractBaseUser): # Modelo de usuário customizado
-
+class CustomUser(AbstractBaseUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
     username = models.CharField(max_length=150, unique=True)
     nome = models.CharField(max_length=150)
-    email = models.EmailField(blank=True, null=True)  # apenas se quiser
-    
-    profile_image = models.ImageField(upload_to='perfil', blank=True, null=True)  # Campo para imagem
-
-    #! Campos sistema
+    email = models.EmailField(blank=True, null=True)
+    profile_image = models.ImageField(upload_to='perfil', blank=True, null=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
-
-    #! Campos obrigatorios Django # Campo padrão do Django
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
-
     objects = CustomUserManager()
+
     class Meta:
-        db_table = 'Usuarios'  # Nome exato da tabela no MySQL
+        db_table = 'Usuarios'
 
     def __str__(self):
-        return f" ID: {self.id} \n Username: {self.username}"
+        return self.username
 
 # ----------------------------
-# Modelo de Serviço
+# Modelo de Filme (Antigo Servico)
 # ----------------------------
-class Servico(models.Model):
-
+class Filme(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    status = models.CharField(max_length=1, default='A') #* A = Ativo, I = Inativo/Desativado
+    titulo = models.CharField(max_length=255)
+    titulo_original = models.CharField(max_length=255, blank=True, null=True)
+    genero = models.CharField(max_length=255, help_text="Ex: Drama, Sci-Fi") 
+    sinopse = models.TextField(blank=True, null=True)
+    diretor = models.CharField(max_length=255, blank=True, null=True)
+    ano_lancamento = models.IntegerField(null=True, blank=True)
+    duracao_minutos = models.IntegerField(default=0)
+    
+    # Armazenar metadados extras (elenco, prêmios, etc)
+    metadados = models.JSONField(blank=True, null=True) 
+    
+    poster = models.ImageField(upload_to='filmes/posters', blank=True, null=True)
+    data_cadastro = models.DateTimeField(auto_now_add=True)
 
-    # Relacionamento com o modelo Servico
+    class Meta:
+        db_table = 'Filmes'
+
+    def __str__(self):
+        return f"{self.titulo} ({self.ano_lancamento})"
+
+# ----------------------------
+# Visualização de Filmes
+# ----------------------------
+class Filme_visualizacao(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         CustomUser, 
-        related_name='servicos',
-        on_delete=models.CASCADE,  # Deleta os servicos se o usuario for deletado
-        db_constraint=True 
+        on_delete=models.SET_NULL, 
+        related_name='filmes_vistos',
+        null=True, blank=True
     )
-
-    titulo = models.CharField(max_length=255)
-    categoria = models.TextField(blank=True, null=True)
-    descricao = models.TextField(blank=True, null=True)
-    tempo_estimado = models.IntegerField(default=0)
-    preco = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    atendimento = models.JSONField(blank=True, null=True)
-    requisitos = models.TextField(blank=True, null=True, default="")
-    cancelamento = models.BooleanField(default=False)
-
-    imagem_p = models.ImageField(upload_to='servicos', blank=True, null=True)  # Campo para imagem
-
-    data_criacao = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'Servicos'  # Nome exato da tabela no MySQL
-
-    def __str__(self):
-        return self.titulo
-    
-class Servico_visualizacao(models.Model):
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    # Relacionamento opcional com o modelo CustomUser (usuário autenticado)
-    client = models.ForeignKey(
-        CustomUser, 
-        on_delete=models.SET_NULL,  # Define como NULL se o usuário for deletado
-        related_name='visualizado',
-        null=True,  # Permite que seja nulo
-        blank=True
+    filme = models.ForeignKey(
+        Filme, 
+        on_delete=models.CASCADE, 
+        related_name='visualizacoes'
     )
-
-    # Relacionamento com o modelo Servico
-    servico = models.ForeignKey(
-        Servico, 
-        on_delete=models.CASCADE, # deleta visualizaão se servico for deletado
-        related_name='visualicacoes'
-    )
-
-    # Campo para armazenar o IP do visitante (para anônimos)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-
-    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_visualizacao = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'Servico_visualizacao'  # Nome exato da tabela no MySQL
+        db_table = 'Filme_visualizacao'
 
-    def __str__(self):
-        if self.client:
-            return f"Visualização por {self.client.username} no serviço {self.servico.titulo}"
-        return f"Visualização anônima (IP: {self.ip_address}) no serviço {self.servico.titulo}"
-
-class Servico_avaliacao(models.Model):
-
+# ----------------------------
+# Avaliação de Filme (Crucial para Recomendação)
+# ----------------------------
+class Filme_avaliacao(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    client = models.ForeignKey(
+    user = models.ForeignKey(
         CustomUser, 
-        on_delete=models.SET_NULL,  # Define como NULL se o usuário for deletado
-        related_name='avaliacao_feitas',
-        null=True,  # Permite que seja nulo
-        blank=True
+        on_delete=models.CASCADE, 
+        related_name='avaliacoes_feitas'
     )
-
-    # Relacionamento com o modelo Servico
-    profissional = models.ForeignKey(
-        CustomUser, 
-        on_delete=models.CASCADE,  # Deleta as avalicacoes se o profissional for deletado
-        related_name='avaliacoes_recebidas'
+    filme = models.ForeignKey(
+        Filme, 
+        on_delete=models.CASCADE, 
+        related_name='avaliacoes'
     )
-
-    # Relacionamento com o modelo Servico
-    servico = models.ForeignKey(
-        Servico, 
-        on_delete=models.SET_NULL,  # Define como NULL se o servico for deletado
-        related_name='avaliacoes',
-        null=True,  # Permite que seja nulo
-        blank=True
-    )
-
-    # Campo de avaliação com valores entre 1 e 5
-    avaliacao = models.IntegerField(
+    # Nota de 1 a 5 (ou 1 a 10, dependendo da sua lógica de SVD)
+    nota = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
-
+    comentario = models.TextField(blank=True, null=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'Servico_avaliacao'  # Nome exato da tabela no MySQL
+        db_table = 'Filme_avaliacao'
+        unique_together = ('user', 'filme') # Garante que o usuário avalie o filme apenas uma vez
 
     def __str__(self):
-        if self.client:
-            return f"Avaliação: {self.avaliacao} para {self.servico.titulo} por {self.client.username}"
-        return f"Avaliação anônima: {self.avaliacao} para {self.servico.titulo}"
-    
-class Servico_contratado(models.Model):
+        return f"{self.user.username} - {self.filme.titulo}: {self.nota}"
 
+# ----------------------------
+# Lista de Assistidos / Histórico
+# ----------------------------
+class Filme_assistido(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
-    # Relacionamento com o modelo Usuario
     user = models.ForeignKey(
         CustomUser, 
-        on_delete=models.SET_NULL,  # Define como NULL se o Usuario for deletado
-        related_name='servicos_contratados',
-        blank=True,
-        null=True,
+        on_delete=models.CASCADE, 
+        related_name='historico_assistidos'
     )
-
-    #! Modificar: Salvar informacoes do servico, caso ele seja excluido
-    # Relacionamento com o modelo Servico
-    servico = models.ForeignKey(
-        Servico, 
-        on_delete=models.SET_NULL,  # Define como NULL se o servico for deletado
-        related_name='contratados',
-        blank=True,
-        null=True,
-        default=None
+    filme = models.ForeignKey(
+        Filme, 
+        on_delete=models.CASCADE, 
+        related_name='usuarios_que_assistiram'
     )
-
-    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_finalizacao = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'Servico_contratados'  # Nome exato da tabela no MySQL
+        db_table = 'Filme_assistidos'
 
-    def __str__(self):
-        user_str = self.user.username if self.user else "Usuário desconhecido"
-        servico_str = self.servico.titulo if self.servico else "Serviço desconhecido"
-        return f"Usuario: {user_str} contratou {servico_str}"
-    
-class Servico_favoritos(models.Model):
-
+# ----------------------------
+# Filmes Favoritos
+# ----------------------------
+class Filme_favoritos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
-    # Relacionamento com o modelo Usuario
     user = models.ForeignKey(
         CustomUser, 
-        on_delete=models.CASCADE,  # Deleta se o usuario for deletado
-        related_name='servicos_favoritos'
-    )
-
-    # Relacionamento com o modelo Servico
-    servico = models.ForeignKey(
-        Servico, 
-        on_delete=models.CASCADE,  # Deleta se serviço for deletado
+        on_delete=models.CASCADE, 
         related_name='favoritos'
     )
-
+    filme = models.ForeignKey(
+        Filme, 
+        on_delete=models.CASCADE, 
+        related_name='favoritado_por'
+    )
     data_criacao = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'Servico_favoritos'  # Nome exato da tabela no MySQL
-
-    def __str__(self):
-        return f"Usuario: {self.user.username} favoritou {self.servico.titulo}"
-    
+        db_table = 'Filme_favoritos'
+        unique_together = ('user', 'filme')

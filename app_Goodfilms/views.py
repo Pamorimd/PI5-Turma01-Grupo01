@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 
 #from .forms import PerfilForm #! pra que?
-from .models import Servico, Servico_favoritos, Servico_avaliacao, Servico_visualizacao
+from .models import Filme, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
 
 #* Pegamos o modelo de usuário correto (CustomUser) pelo *Django*.
 CustomUser = get_user_model()
