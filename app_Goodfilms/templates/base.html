@@ -160,14 +160,33 @@
     {% comment %} Bloco side bar padronizado para o site {% endcomment %}
     {% block sidebar %}  
     <div class="sidebar">
-      <a href="{% url 'home' %}">
-        <h4 class="mb-4">QuickFix</h4></a>
-        <a href="{% url 'dashboard' %}" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
-        <a href="#"><i class="fas fa-heart"></i> Favoritos</a>
-        <a href="#"><i class="fas fa-user-friends"></i> Amigos</a>
-        <a href="{% url 'meus_servicos' %}"><i class="fas fa-list"></i> Lista de Serviços</a>
-        <a href="{% url 'cadastro_de_servico' %}"><i class="fas fa-plus"></i> Novo Anúncio</a>
-        <a href="{% url 'configuracoes'  %}"><i class="fas fa-cog"></i> Configurações</a>
+      <a href="{% url 'index' %}" class="text-decoration-none">
+        <h4 class="mb-4">Goodfilms</h4>
+      </a>
+
+      <a href="{% url 'dashboard' %}" class="{% if pagina.code == 'dashboard' %}active{% endif %}">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </a>
+
+      <a href="{% url 'favoritos' %}" class="{% if pagina.code == 'favoritos' %}active{% endif %}">
+        <i class="fas fa-heart"></i> Favoritos
+      </a>
+
+      <a href="{% url 'home_user' %}" class="{% if pagina.code == 'home_user' %}active{% endif %}">
+        <i class="fas fa-house"></i> Home
+      </a>
+
+      <a href="{% url 'meus_filmes' %}" class="{% if pagina.code == 'meus_filmes' %}active{% endif %}">
+        <i class="fas fa-film"></i> Meus Filmes
+      </a>
+
+      <a href="{% url 'cadastro_de_filme' %}" class="{% if pagina.code == 'cadastro_de_filme' %}active{% endif %}">
+        <i class="fas fa-plus"></i> Novo Filme
+      </a>
+
+      <a href="{% url 'configuracoes' %}" class="{% if pagina.code == 'configuracoes' %}active{% endif %}">
+        <i class="fas fa-cog"></i> Configurações
+      </a>
     </div>
     {% endblock %}
 

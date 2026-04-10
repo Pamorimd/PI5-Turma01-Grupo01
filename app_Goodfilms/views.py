@@ -55,19 +55,9 @@ def base_Usuario_view(request):
 def dashboard(request):
     user = request.user
 
-    # Conta visualizações dos filmes do usuário
-    # Ajuste "filme__user" caso o campo dono no model tenha outro nome
-    visualizacoes = Filme_visualizacao.objects.filter(filme__user=user).count()
-
-    # Quantos filmes do usuário existem
-    meus_filmes = Filme.objects.filter(user=user).count()
-
-    # Quantos favoritos o usuário fez
+    visualizacoes = Filme_visualizacao.objects.filter(user=user).count()
     total_favoritos = Filme_favoritos.objects.filter(user=user).count()
-
-    # Quantas avaliações os filmes do usuário receberam
-    # Ajuste "filme__user" se necessário
-    total_avaliacoes = Filme_avaliacao.objects.filter(filme__user=user).count()
+    total_avaliacoes = Filme_avaliacao.objects.filter(user=user).count()
 
     return render(request, Area_usuario + 'dashboard_user.html', {
         'pagina': {
@@ -75,11 +65,9 @@ def dashboard(request):
             'code': 'dashboard'
         },
         'visualizacoes': visualizacoes,
-        'meus_filmes': meus_filmes,
         'total_favoritos': total_favoritos,
         'total_avaliacoes': total_avaliacoes,
     })
-
 
 @login_required
 def favoritos(request):
@@ -175,10 +163,8 @@ def filme_detalhe(request, id):
     filme = get_object_or_404(Filme, id=id)
     user = request.user if request.user.is_authenticated else None
 
-    # Cria registro de visualização
-    # Ajuste "client" para "user" caso seu model use user ao invés de client
     Filme_visualizacao.objects.create(
-        client=user,
+        user=user,
         filme=filme,
     )
 
@@ -278,8 +264,18 @@ def cadastro(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('senha')
+        username = (
+            request.POST.get('username')
+            or request.POST.get('email')
+            or request.POST.get('usuario')
+            or ''
+        ).strip()
+
+        password = (
+            request.POST.get('senha')
+            or request.POST.get('password')
+            or ''
+        ).strip()
 
         if not username or not password:
             return render(request, Area_login + 'login.html', {
@@ -297,14 +293,12 @@ def login_view(request):
                 request.session.set_expiry(60 * 60 * 24 * 1)
 
             return redirect('/home')
-        else:
-            return render(request, Area_login + 'login.html', {
-                'form_err': 'Usuário ou senha inválidos'
-            })
+
+        return render(request, Area_login + 'login.html', {
+            'form_err': 'Usuário ou senha inválidos.'
+        })
 
     return render(request, Area_login + 'login.html')
-
-
 def logout_view(request):
     logout(request)
     return redirect('/')
