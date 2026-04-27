@@ -1,0 +1,391 @@
+{% extends "area_usuario/base.html" %}
+{% load static %}
+
+{% block title %}{% if filme %}Editar Filme{% else %}Adicionar Filme{% endif %} - Goodfilms{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cine-panel: #f8fbff;
+    --cine-surface: #ffffff;
+    --cine-primary: #4a84d7;
+    --cine-primary-dark: #2e5d9d;
+    --cine-text: #193357;
+    --cine-muted: #6a7e9c;
+    --cine-border: #cddcf3;
+    --cine-shadow: 0 16px 34px rgba(45, 93, 161, 0.12);
+  }
+
+  body {
+    background: radial-gradient(circle at 0 0, #f7fbff 0%, #e8f1ff 36%, #e9f1ff 100%);
+    font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    color: var(--cine-text);
+  }
+
+  .main-content {
+    margin-left: 300px;
+    min-height: 100vh;
+    padding: 26px 28px 30px;
+    background: transparent;
+  }
+
+  .cine-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    border-right: 1px solid var(--cine-border);
+    background: linear-gradient(170deg, #e7f1ff 0%, #dbe9ff 100%);
+    padding: 24px 20px;
+    z-index: 10;
+  }
+
+  .cine-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    color: var(--cine-primary-dark);
+    text-decoration: none;
+  }
+
+  .cine-brand i {
+    font-size: 1.6rem;
+  }
+
+  .cine-brand span {
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .cine-nav {
+    display: grid;
+    gap: 10px;
+  }
+
+  .cine-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--cine-primary-dark);
+    font-weight: 600;
+    transition: 0.2s ease;
+  }
+
+  .cine-nav-link:hover,
+  .cine-nav-link.active {
+    background: var(--cine-surface);
+    box-shadow: 0 8px 22px rgba(74, 132, 215, 0.14);
+  }
+
+  .cine-add-btn {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 14px;
+    background: var(--cine-surface);
+    color: var(--cine-primary-dark);
+    text-decoration: none;
+    font-weight: 700;
+    padding: 12px 14px;
+    box-shadow: 0 8px 22px rgba(74, 132, 215, 0.14);
+    border: 1px solid #a8c3eb;
+  }
+
+  .cine-home-shell {
+    display: grid;
+    gap: 16px;
+  }
+
+  .cine-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border: 1px solid var(--cine-border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(3px);
+  }
+
+  .cine-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--cine-primary);
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .cine-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cine-voltar {
+    border: 1px solid #adc6ec;
+    border-radius: 10px;
+    background: #f1f7ff;
+    color: #2f5f9f;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 8px 12px;
+  }
+
+  .cine-panel {
+    border: 1px solid var(--cine-border);
+    border-radius: 18px;
+    background: var(--cine-panel);
+    padding: 24px;
+    box-shadow: var(--cine-shadow);
+  }
+
+  .cine-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .cine-title i {
+    color: var(--cine-primary-dark);
+    font-size: 1.65rem;
+  }
+
+  .cine-title h1 {
+    margin: 0;
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: clamp(1.55rem, 1.8vw, 2.2rem);
+    color: #0f2a4d;
+  }
+
+  .cine-subtitle {
+    margin: 0 0 20px;
+    color: var(--cine-muted);
+  }
+
+  .cine-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cine-form-main {
+    display: grid;
+    gap: 12px;
+  }
+
+  .cine-field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .cine-field label {
+    color: #34557f;
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  .cine-field input,
+  .cine-field select,
+  .cine-field textarea {
+    border: 1px solid #bdd1ee;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 10px 12px;
+    color: #14345d;
+    outline: none;
+  }
+
+  .cine-field textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .cine-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .cine-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .cine-btn {
+    border-radius: 10px;
+    border: 1px solid #adc6ec;
+    padding: 10px 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .cine-btn-secondary {
+    background: #edf5ff;
+    color: #305f9e;
+  }
+
+  .cine-btn-primary {
+    background: #d6e8ff;
+    color: #0f3f79;
+  }
+
+  @media (max-width: 992px) {
+    .cine-sidebar {
+      position: static;
+      width: auto;
+      height: auto;
+      margin: 0 16px;
+      border-radius: 18px;
+      border: 1px solid var(--cine-border);
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 16px;
+    }
+
+    .cine-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<aside class="cine-sidebar">
+  <a href="{% url 'home' %}" class="cine-brand">
+    <i class="fas fa-clapperboard"></i>
+    <span>Goodfilms</span>
+  </a>
+
+  <nav class="cine-nav">
+    <a href="{% url 'home' %}" class="cine-nav-link">
+      <i class="fas fa-film"></i> Meus Filmes
+    </a>
+    <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link">
+      <i class="fas fa-lightbulb"></i> Recomenda&ccedil;&otilde;es
+    </a>
+    <a href="{% url 'home' %}?modo=avaliados" class="cine-nav-link">
+      <i class="fas fa-star"></i> Avaliados
+    </a>
+    <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link">
+      <i class="fas fa-heart"></i> Favoritos
+    </a>
+  </nav>
+
+  <a href="{% url 'cadastro_de_filme' %}" class="cine-add-btn">
+    <i class="fas fa-plus"></i> Adicionar filme
+  </a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<div class="cine-home-shell">
+  <header class="cine-topbar">
+    <a href="{% url 'home' %}" class="cine-logo">
+      <i class="fas fa-clapperboard"></i>
+      Goodfilms
+    </a>
+
+    <div class="cine-topbar-actions">
+      <a href="{% url 'home' %}" class="cine-voltar"><i class="fas fa-arrow-left"></i> Voltar</a>
+    </div>
+  </header>
+
+  <section class="cine-panel">
+    <div class="cine-title">
+      <i class="fas fa-plus-square" aria-hidden="true"></i>
+      <h1>{% if filme %}Editar Filme{% else %}Adicionar Filme{% endif %}</h1>
+    </div>
+    <p class="cine-subtitle">
+      Esta tela est&aacute; em modo mock. Os campos s&atilde;o visuais por enquanto e n&atilde;o salvam no banco.
+    </p>
+
+    <form class="cine-form-grid" id="mockForm" onsubmit="return false;">
+      <div class="cine-form-main">
+        <div class="cine-field">
+          <label for="titulo">T&iacute;tulo</label>
+          <input id="titulo" type="text" value="{{ filme.titulo|default:'' }}" placeholder="Ex: Interestelar">
+        </div>
+
+        <div class="cine-row">
+          <div class="cine-field">
+            <label for="titulo_original">T&iacute;tulo original</label>
+            <input id="titulo_original" type="text" value="{{ filme.titulo_original|default:'' }}" placeholder="Original title">
+          </div>
+          <div class="cine-field">
+            <label for="genero">G&ecirc;nero</label>
+            <input id="genero" type="text" value="{{ filme.genero|default:'' }}" placeholder="Drama, Sci-Fi, A&ccedil;&atilde;o...">
+          </div>
+        </div>
+
+        <div class="cine-row">
+          <div class="cine-field">
+            <label for="diretor">Diretor</label>
+            <input id="diretor" type="text" value="{{ filme.diretor|default:'' }}" placeholder="Nome do diretor">
+          </div>
+          <div class="cine-field">
+            <label for="ano_lancamento">Ano de lan&ccedil;amento</label>
+            <input id="ano_lancamento" type="number" value="{{ filme.ano_lancamento|default:'' }}" placeholder="2026" min="1900" max="2100">
+          </div>
+        </div>
+
+        <div class="cine-row">
+          <div class="cine-field">
+            <label for="duracao">Dura&ccedil;&atilde;o (min)</label>
+            <input id="duracao" type="number" value="{{ filme.duracao_minutos|default:'' }}" placeholder="120" min="1">
+          </div>
+          <div class="cine-field">
+            <label for="classificacao">Classifica&ccedil;&atilde;o</label>
+            <select id="classificacao">
+              <option>Livre</option>
+              <option>10 anos</option>
+              <option>12 anos</option>
+              <option>14 anos</option>
+              <option>16 anos</option>
+              <option>18 anos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cine-field">
+          <label for="sinopse">Sinopse</label>
+          <textarea id="sinopse" placeholder="Descreva rapidamente o filme...">{{ filme.sinopse|default:'' }}</textarea>
+        </div>
+      </div>
+
+    </form>
+
+    <div class="cine-actions">
+      <a href="{% url 'home' %}" class="cine-btn cine-btn-secondary">
+        <i class="fas fa-times"></i> Cancelar
+      </a>
+      <button type="button" class="cine-btn cine-btn-primary">
+        <i class="fas fa-check"></i> Salvar
+      </button>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
