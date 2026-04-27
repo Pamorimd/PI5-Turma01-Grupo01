@@ -1,204 +1,250 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Login - GoodFilms{% endblock %}
+{% block title %}Entrar - GoodFilms{% endblock %}
 
 {% block sidebar %}{% endblock %}
 
 {% block extra_head %}
 <style>
+  :root {
+    --auth-bg: #dceeff;
+    --auth-card: #ffffff;
+    --auth-primary: #5d9ceb;
+    --auth-primary-dark: #3d78c4;
+    --auth-text: #1f2937;
+    --auth-muted: #6f7f91;
+    --auth-border: #e9eef5;
+    --auth-input: #f7faff;
+    --auth-shadow: 0 18px 40px rgba(75, 132, 194, 0.16);
+  }
 
-/* remove espaço da sidebar */
-.main-content {
-  margin-left: 0 !important;
-  padding: 0;
-  min-height: 100vh;
-  background: linear-gradient(to right, #1e3c72, #2a5298) !important;
-}
+  body {
+    background: var(--auth-bg) !important;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
 
-/* fundo da página */
-body {
-  background: linear-gradient(to right, #1e3c72, #2a5298);
-  font-family: Arial, sans-serif;
-}
+  .main-content {
+    margin-left: 0 !important;
+    min-height: 100vh;
+    padding: 0 !important;
+    background: var(--auth-bg) !important;
+  }
 
-/* centraliza o card */
-.login-wrapper {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  .auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 42px 24px 56px;
+  }
 
-/* card do login */
-.login-container {
-  width: 380px;
-  background: white;
-  border-radius: 14px;
-  padding: 35px 30px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
+  .auth-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 34px;
+    color: var(--auth-primary-dark);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+  }
 
-/* título */
-.login-container h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-weight: 700;
-  color: #1f2937;
-}
+  .auth-brand i {
+    color: var(--auth-primary);
+    font-size: 2.15rem;
+  }
 
-/* inputs */
-.form-control {
-  padding: 12px 14px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #e5e7eb;
-}
+  .auth-card {
+    width: min(100%, 420px);
+    border: 1px solid rgba(255, 255, 255, 0.86);
+    border-radius: 8px;
+    background: var(--auth-card);
+    padding: 32px 34px;
+    box-shadow: var(--auth-shadow);
+  }
 
-/* efeito ao clicar */
-.form-control:focus {
-  border-color: #ffc107;
-  box-shadow: 0 0 0 2px rgba(255,193,7,0.15);
-}
+  .auth-card h1 {
+    margin: 0 0 24px;
+    color: var(--auth-text);
+    font-size: 1.55rem;
+    font-weight: 700;
+  }
 
-/* botão amarelo */
-.btn-login {
-  background-color: #ffc107;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #212529;
-  width: 100%;
-  transition: 0.3s;
-}
+  .auth-field {
+    margin-bottom: 14px;
+  }
 
-.btn-login:hover {
-  background-color: #e0a800;
-}
+  .auth-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--auth-muted);
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
 
-/* link esqueceu senha */
-.forgot-password {
-  font-size: 0.85rem;
-  color: #ffc107;
-  text-decoration: none;
-}
+  .auth-field input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--auth-border);
+    border-radius: 6px;
+    outline: none;
+    background: var(--auth-input);
+    color: var(--auth-text);
+    padding: 9px 12px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
 
-/* cadastro */
-.register-link {
-  text-align: center;
-  margin-top: 18px;
-  font-size: 0.9rem;
-}
+  .auth-field input:focus {
+    border-color: #b8d4f8;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(93, 156, 235, 0.14);
+  }
 
-.register-link a {
-  color: #ffc107;
-  font-weight: 600;
-  text-decoration: none;
-}
+  .auth-password-wrap {
+    position: relative;
+  }
 
-/* checkbox */
-.form-check-label {
-  font-size: 0.85rem;
-}
+  .auth-password-wrap input {
+    padding-right: 44px;
+  }
 
-/* erro */
-.alert-danger {
-  font-size: 0.85rem;
-  margin-top: 10px;
-}
+  .auth-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #7d8da1;
+    transform: translateY(-50%);
+  }
 
+  .auth-password-toggle:hover,
+  .auth-password-toggle:focus {
+    color: var(--auth-primary-dark);
+    background: #edf5ff;
+    outline: none;
+  }
+
+  .auth-button {
+    width: 100%;
+    height: 46px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 6px;
+    background: var(--auth-primary);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(93, 156, 235, 0.25);
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .auth-button:hover {
+    background: var(--auth-primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .auth-link {
+    display: inline-block;
+    margin-top: 18px;
+    color: #427da8;
+    font-size: 0.94rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .auth-link:hover {
+    color: var(--auth-primary-dark);
+    text-decoration: underline;
+  }
+
+  .auth-alert {
+    margin: 0 0 14px;
+    border: 1px solid #ffd7d7;
+    border-radius: 6px;
+    background: #fff4f4;
+    color: #b42323;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 560px) {
+    .auth-page {
+      padding: 30px 16px;
+    }
+
+    .auth-brand {
+      margin-bottom: 24px;
+      font-size: 1.65rem;
+    }
+
+    .auth-card {
+      padding: 26px 22px;
+    }
+  }
 </style>
 {% endblock %}
 
-
 {% block content %}
+<main class="auth-page">
+  <a class="auth-brand" href="{% url 'index' %}">
+    <i class="fas fa-clapperboard"></i>
+    <span>GoodFilms</span>
+  </a>
 
-<div class="login-wrapper">
+  <section class="auth-card" aria-labelledby="login-title">
+    <h1 id="login-title">Entrar</h1>
 
-  <div class="login-container">
+    {% if form_err %}
+      <div class="auth-alert">{{ form_err }}</div>
+    {% endif %}
 
-    <h2>Entrar no GoodFilms</h2>
-
-    <form method="POST">
-
+    <form method="post" action="{% url 'login' %}">
       {% csrf_token %}
 
-      <input 
-        type="text" 
-        name="username" 
-        class="form-control" 
-        placeholder="Usuário"
-        required
-      >
-
-      <input 
-        type="password" 
-        name="password" 
-        class="form-control" 
-        placeholder="Senha"
-        required
-      >
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-
-        <div class="form-check">
-
-          <input 
-            class="form-check-input"
-            type="checkbox"
-            name="remember_me"
-            id="rememberMe"
-          >
-
-          <label 
-            class="form-check-label"
-            for="rememberMe"
-          >
-            Me lembre
-          </label>
-
-        </div>
-
-        <a 
-          href="{% url 'password_reset' %}"
-          class="forgot-password"
-        >
-          Esqueceu a senha?
-        </a>
-
+      <div class="auth-field">
+        <label for="login-email">Email</label>
+        <input id="login-email" type="text" name="email" autocomplete="username" required>
       </div>
 
-
-      <button 
-        type="submit"
-        class="btn btn-login"
-      >
-        Entrar
-      </button>
-
-
-      {% if form_err %}
-        <div class="alert alert-danger">
-          {{ form_err }}
+      <div class="auth-field">
+        <label for="login-password">Senha</label>
+        <div class="auth-password-wrap">
+          <input id="login-password" type="password" name="password" autocomplete="current-password" required>
+          <button class="auth-password-toggle" type="button" aria-label="Mostrar senha" data-password-toggle="login-password">
+            <i class="fas fa-eye-slash"></i>
+          </button>
         </div>
-      {% endif %}
-
-
-      <div class="register-link">
-
-        Ainda não tem conta?
-
-        <a href="{% url 'cadastro' %}">
-          Cadastre-se
-        </a>
-
       </div>
 
+      <button class="auth-button" type="submit">Entrar</button>
     </form>
 
-  </div>
+    <a class="auth-link" href="{% url 'cadastro' %}">N&atilde;o tem conta? Criar conta</a>
+  </section>
+</main>
+{% endblock %}
 
-</div>
+{% block scripts %}
+{{ block.super }}
+<script>
+  document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const input = document.getElementById(button.dataset.passwordToggle);
+      const icon = button.querySelector('i');
+      const shouldShow = input.type === 'password';
 
+      input.type = shouldShow ? 'text' : 'password';
+      button.setAttribute('aria-label', shouldShow ? 'Ocultar senha' : 'Mostrar senha');
+      icon.classList.toggle('fa-eye', shouldShow);
+      icon.classList.toggle('fa-eye-slash', !shouldShow);
+      input.focus();
+    });
+  });
+</script>
 {% endblock %}

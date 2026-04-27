@@ -1,147 +1,265 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Cadastro - GoodFilms{% endblock %}
+{% block title %}Criar Conta - GoodFilms{% endblock %}
 
 {% block sidebar %}{% endblock %}
 
 {% block extra_head %}
 <style>
-.main-content {
+  :root {
+    --auth-bg: #dceeff;
+    --auth-card: #ffffff;
+    --auth-primary: #5d9ceb;
+    --auth-primary-dark: #3d78c4;
+    --auth-text: #1f2937;
+    --auth-muted: #6f7f91;
+    --auth-border: #e9eef5;
+    --auth-input: #f7faff;
+    --auth-shadow: 0 18px 40px rgba(75, 132, 194, 0.16);
+  }
+
+  body {
+    background: var(--auth-bg) !important;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
+
+  .main-content {
     margin-left: 0 !important;
-    padding: 0;
     min-height: 100vh;
-    background: linear-gradient(to right, #1e3c72, #2a5298) !important;
-}
+    padding: 0 !important;
+    background: var(--auth-bg) !important;
+  }
 
-body {
-    background: linear-gradient(to right, #1e3c72, #2a5298);
-    font-family: Arial, sans-serif;
-}
-
-.register-box {
+  .auth-page {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
+    justify-content: flex-start;
+    padding: 42px 24px 56px;
+  }
 
-.register-card {
-    width: 100%;
-    max-width: 380px;
-    background: #fff;
-    border-radius: 14px;
-    padding: 35px 30px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.10);
-}
-
-.register-card h2 {
-    text-align: center;
-    margin-bottom: 25px;
+  .auth-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 34px;
+    color: var(--auth-primary-dark);
+    font-size: 1.9rem;
     font-weight: 700;
-    color: #1f2937;
-}
-
-.register-card .form-control {
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 15px;
-    border: 1px solid #e5e7eb;
-}
-
-.register-card .form-control:focus {
-    border-color: #ffc107;
-    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.15);
-}
-
-.btn-cadastro {
-    width: 100%;
-    border: none;
-    border-radius: 10px;
-    padding: 12px;
-    font-weight: 600;
-    background: #ffc107;
-    color: #212529;
-    transition: 0.25s ease;
-}
-
-.btn-cadastro:hover {
-    background: #e0a800;
-    color: #fff;
-}
-
-.link-login {
-    text-align: center;
-    margin-top: 18px;
-    font-size: 0.95rem;
-    color: #1f2937;
-}
-
-.link-login a {
-    color: #ffc107;
-    font-weight: 600;
+    line-height: 1;
     text-decoration: none;
-}
+  }
 
-.link-login a:hover {
+  .auth-brand i {
+    color: var(--auth-primary);
+    font-size: 2.15rem;
+  }
+
+  .auth-card {
+    width: min(100%, 420px);
+    border: 1px solid rgba(255, 255, 255, 0.86);
+    border-radius: 8px;
+    background: var(--auth-card);
+    padding: 32px 34px;
+    box-shadow: var(--auth-shadow);
+  }
+
+  .auth-card h1 {
+    margin: 0 0 24px;
+    color: var(--auth-text);
+    font-size: 1.55rem;
+    font-weight: 700;
+  }
+
+  .auth-field {
+    margin-bottom: 14px;
+  }
+
+  .auth-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--auth-muted);
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .auth-field input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--auth-border);
+    border-radius: 6px;
+    outline: none;
+    background: var(--auth-input);
+    color: var(--auth-text);
+    padding: 9px 12px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .auth-field input:focus {
+    border-color: #b8d4f8;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(93, 156, 235, 0.14);
+  }
+
+  .auth-password-wrap {
+    position: relative;
+  }
+
+  .auth-password-wrap input {
+    padding-right: 44px;
+  }
+
+  .auth-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #7d8da1;
+    transform: translateY(-50%);
+  }
+
+  .auth-password-toggle:hover,
+  .auth-password-toggle:focus {
+    color: var(--auth-primary-dark);
+    background: #edf5ff;
+    outline: none;
+  }
+
+  .auth-button {
+    width: 100%;
+    height: 46px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 6px;
+    background: var(--auth-primary);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(93, 156, 235, 0.25);
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .auth-button:hover {
+    background: var(--auth-primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .auth-link {
+    display: inline-block;
+    margin-top: 18px;
+    color: #427da8;
+    font-size: 0.94rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .auth-link:hover {
+    color: var(--auth-primary-dark);
     text-decoration: underline;
-}
+  }
 
-.alert-danger {
+  .auth-alert {
+    margin: 0 0 14px;
+    border: 1px solid #ffd7d7;
+    border-radius: 6px;
+    background: #fff4f4;
+    color: #b42323;
+    padding: 10px 12px;
     font-size: 0.9rem;
-    margin-bottom: 15px;
-}
+  }
+
+  @media (max-width: 560px) {
+    .auth-page {
+      padding: 30px 16px;
+    }
+
+    .auth-brand {
+      margin-bottom: 24px;
+      font-size: 1.65rem;
+    }
+
+    .auth-card {
+      padding: 26px 22px;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="register-box">
-    <div class="register-card">
-        <h2>Cadastre-se no GoodFilms</h2>
+<main class="auth-page">
+  <a class="auth-brand" href="{% url 'index' %}">
+    <i class="fas fa-clapperboard"></i>
+    <span>GoodFilms</span>
+  </a>
 
-        <form method="POST">
-            {% csrf_token %}
+  <section class="auth-card" aria-labelledby="register-title">
+    <h1 id="register-title">Criar Conta</h1>
 
-            <input
-                type="text"
-                name="username"
-                class="form-control"
-                placeholder="Usuário"
-                required
-            >
+    {% if form_err %}
+      <div class="auth-alert">{{ form_err }}</div>
+    {% endif %}
 
-            <input
-                type="password"
-                name="senha"
-                class="form-control"
-                placeholder="Senha"
-                required
-            >
+    <form method="post" action="{% url 'cadastro' %}">
+      {% csrf_token %}
 
-            <input
-                type="password"
-                name="senha_confirmada"
-                class="form-control"
-                placeholder="Confirmar senha"
-                required
-            >
+      <div class="auth-field">
+        <label for="register-name">Nome</label>
+        <input id="register-name" type="text" name="nome" autocomplete="name" required>
+      </div>
 
-            {% if form_err %}
-                <div class="alert alert-danger">
-                    {{ form_err }}
-                </div>
-            {% endif %}
+      <div class="auth-field">
+        <label for="register-email">Email</label>
+        <input id="register-email" type="email" name="email" autocomplete="email" required>
+      </div>
 
-            <button type="submit" class="btn btn-cadastro">
-                Cadastrar
-            </button>
+      <div class="auth-field">
+        <label for="register-password">Senha</label>
+        <div class="auth-password-wrap">
+          <input id="register-password" type="password" name="senha" autocomplete="new-password" required>
+          <button class="auth-password-toggle" type="button" aria-label="Mostrar senha" data-password-toggle="register-password">
+            <i class="fas fa-eye-slash"></i>
+          </button>
+        </div>
+      </div>
 
-            <div class="link-login">
-                Já tem conta?
-                <a href="{% url 'login' %}">Fazer login</a>
-            </div>
-        </form>
-    </div>
-</div>
+      <div class="auth-field">
+        <label for="register-confirm-password">Confirmar senha</label>
+        <div class="auth-password-wrap">
+          <input id="register-confirm-password" type="password" name="senha_confirmada" autocomplete="new-password" required>
+          <button class="auth-password-toggle" type="button" aria-label="Mostrar senha" data-password-toggle="register-confirm-password">
+            <i class="fas fa-eye-slash"></i>
+          </button>
+        </div>
+      </div>
+
+      <button class="auth-button" type="submit">Criar conta</button>
+    </form>
+
+    <a class="auth-link" href="{% url 'login' %}">J&aacute; tem conta? Entrar</a>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+  document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const input = document.getElementById(button.dataset.passwordToggle);
+      const icon = button.querySelector('i');
+      const shouldShow = input.type === 'password';
+
+      input.type = shouldShow ? 'text' : 'password';
+      button.setAttribute('aria-label', shouldShow ? 'Ocultar senha' : 'Mostrar senha');
+      icon.classList.toggle('fa-eye', shouldShow);
+      icon.classList.toggle('fa-eye-slash', !shouldShow);
+      input.focus();
+    });
+  });
+</script>
 {% endblock %}

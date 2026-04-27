@@ -274,22 +274,34 @@ def send_filme(request, user, filme=None):
 
 def cadastro(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('senha')
+        nome = (request.POST.get('nome') or '').strip()
+        email = (request.POST.get('email') or '').strip().lower()
+        password = (request.POST.get('senha') or '').strip()
+        username = email
+
+        if not nome or not email or not password:
+            return render(request, Area_login + 'register.html', {
+                'form_err': 'Nome, email e senha são obrigatórios.'
+            })
 
         if password != request.POST.get('senha_confirmada'):
             return render(request, Area_login + 'register.html', {
                 'form_err': 'As senhas não coincidem.'
             })
 
-        if CustomUser.objects.filter(username=username).exists():
+        if (
+            CustomUser.objects.filter(username__iexact=username).exists()
+            or CustomUser.objects.filter(email__iexact=email).exists()
+        ):
             return render(request, Area_login + 'register.html', {
-                'form_err': 'Usuário já existe.'
+                'form_err': 'Email já cadastrado.'
             })
 
         user = CustomUser.objects.create_user(
             username=username,
             password=password,
+            nome=nome,
+            email=email,
         )
         user.save()
 
@@ -319,6 +331,15 @@ def login_view(request):
             })
 
         user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            user_by_email = CustomUser.objects.filter(email__iexact=username).first()
+            if user_by_email is not None:
+                user = authenticate(
+                    request,
+                    username=user_by_email.get_username(),
+                    password=password,
+                )
 
         if user is not None:
             login(request, user)
