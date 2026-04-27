@@ -427,13 +427,6 @@
         <i class="fas fa-clapperboard"></i>
         Goodfilms
       </a>
-
-      <nav class="cine-tabs">
-        <a href="{% url 'home' %}" class="cine-tab {% if modo == 'meus-filmes' %}active{% endif %}">Meus Filmes</a>
-        <a href="{% url 'home' %}?modo=recomendacoes" class="cine-tab {% if modo == 'recomendacoes' %}active{% endif %}">Recomenda&ccedil;&otilde;es</a>
-        <a href="{% url 'dashboard' %}" class="cine-tab">Avaliados</a>
-        <a href="{% url 'favoritos' %}" class="cine-tab">Favoritos</a>
-      </nav>
     </div>
 
     <form class="cine-search-form" method="get" action="{% url 'home' %}">
