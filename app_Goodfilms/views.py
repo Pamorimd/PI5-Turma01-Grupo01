@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db.models import Avg, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
+from django.db.models.functions import Coalesce
 
 from .models import Filme, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
 
@@ -104,17 +106,51 @@ def amigos(request):
 
 @login_required
 def home_user(request):
-    query = request.GET.get('q', '')
+    query = request.GET.get('q', '').strip()
+    modo = request.GET.get('modo', 'meus-filmes').strip()
+
+    avaliacao_usuario = Filme_avaliacao.objects.filter(
+        user=request.user,
+        filme=OuterRef('pk')
+    )
+
+    filmes = (
+        Filme.objects.all()
+        .annotate(
+            media_nota=Coalesce(Avg('avaliacoes__nota'), Value(0.0)),
+            minha_nota=Subquery(avaliacao_usuario.values('nota')[:1], output_field=IntegerField()),
+            meu_comentario=Subquery(avaliacao_usuario.values('comentario')[:1], output_field=TextField()),
+        )
+        .annotate(
+            media_percentual=ExpressionWrapper(
+                F('media_nota') * Value(20.0),
+                output_field=FloatField(),
+            )
+        )
+    )
 
     if query:
-        filmes = Filme.objects.filter(titulo__icontains=query).order_by('-data_criacao')
+        filmes = filmes.filter(titulo__icontains=query)
+
+    if modo == 'recomendacoes':
+        filmes = filmes.order_by('-media_nota', '-data_cadastro')
+        titulo_home = 'Recomenda\u00e7\u00f5es'
     else:
-        filmes = Filme.objects.all().order_by('-data_criacao')
+        modo = 'meus-filmes'
+        filmes = filmes.order_by('-data_cadastro')
+        titulo_home = 'Meus Filmes'
 
     sender_page = {
+        'pagina': {
+            'name': titulo_home,
+            'code': 'home',
+            'intro': False,
+        },
         'filmes': filmes,
         'incluir_favoritos': _get_favoritos_ids(request.user),
-        'q': query
+        'q': query,
+        'modo': modo,
+        'titulo_home': titulo_home,
     }
 
     return render(request, Area_usuario + 'home.html', sender_page)

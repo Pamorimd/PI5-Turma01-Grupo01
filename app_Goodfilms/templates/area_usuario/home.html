@@ -1,55 +1,523 @@
 {% extends "area_usuario/base.html" %}
 {% load static %}
 
+{% block title %}Meus Filmes - Goodfilms{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cine-bg: #e9f1ff;
+    --cine-panel: #f8fbff;
+    --cine-surface: #ffffff;
+    --cine-primary: #4a84d7;
+    --cine-primary-dark: #2e5d9d;
+    --cine-text: #193357;
+    --cine-muted: #6a7e9c;
+    --cine-border: #cddcf3;
+    --cine-shadow: 0 16px 34px rgba(45, 93, 161, 0.12);
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 0 0, #f7fbff 0%, #e8f1ff 36%, #e9f1ff 100%);
+    font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    color: var(--cine-text);
+  }
+
+  .main-content {
+    margin-left: 300px;
+    min-height: 100vh;
+    padding: 26px 28px 30px;
+    background: transparent;
+  }
+
+  .cine-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    border-right: 1px solid var(--cine-border);
+    background: linear-gradient(170deg, #e7f1ff 0%, #dbe9ff 100%);
+    padding: 24px 20px;
+    z-index: 10;
+  }
+
+  .cine-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    color: var(--cine-primary-dark);
+    text-decoration: none;
+  }
+
+  .cine-brand i {
+    font-size: 1.6rem;
+  }
+
+  .cine-brand span {
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .cine-nav {
+    display: grid;
+    gap: 10px;
+  }
+
+  .cine-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--cine-primary-dark);
+    font-weight: 600;
+    transition: 0.2s ease;
+  }
+
+  .cine-nav-link:hover,
+  .cine-nav-link.active {
+    background: var(--cine-surface);
+    box-shadow: 0 8px 22px rgba(74, 132, 215, 0.14);
+  }
+
+  .cine-add-btn {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: none;
+    border-radius: 14px;
+    background: var(--cine-surface);
+    color: var(--cine-primary-dark);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 14px;
+    box-shadow: 0 8px 22px rgba(74, 132, 215, 0.14);
+  }
+
+  .cine-home-shell {
+    display: grid;
+    gap: 16px;
+  }
+
+  .cine-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border: 1px solid var(--cine-border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(3px);
+  }
+
+  .cine-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .cine-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--cine-primary);
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .cine-logo i {
+    font-size: 1.9rem;
+  }
+
+  .cine-tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .cine-tab {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: var(--cine-muted);
+    padding: 7px 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s ease;
+  }
+
+  .cine-tab:hover {
+    color: var(--cine-primary-dark);
+    border-color: var(--cine-border);
+  }
+
+  .cine-tab.active {
+    border-color: var(--cine-primary);
+    background: #dcebff;
+    color: var(--cine-primary-dark);
+  }
+
+  .cine-search-form {
+    min-width: min(100%, 320px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cine-surface);
+    border: 1px solid var(--cine-border);
+    border-radius: 12px;
+    padding: 6px 8px 6px 14px;
+  }
+
+  .cine-search-form input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.95rem;
+    color: var(--cine-text);
+    background: transparent;
+  }
+
+  .cine-search-form button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    color: var(--cine-primary-dark);
+    background: #e6f0ff;
+  }
+
+  .cine-panel {
+    border: 1px solid var(--cine-border);
+    border-radius: 18px;
+    background: var(--cine-panel);
+    padding: 22px;
+    box-shadow: var(--cine-shadow);
+  }
+
+  .cine-panel h1 {
+    margin: 0 0 14px;
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: clamp(1.55rem, 1.8vw, 2.2rem);
+    color: #0f2a4d;
+  }
+
+  .cine-subtabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #dbe7fb;
+    padding-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .cine-subtab {
+    text-decoration: none;
+    border-radius: 8px;
+    color: var(--cine-muted);
+    padding: 8px 12px;
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+
+  .cine-subtab.active {
+    color: var(--cine-primary-dark);
+    background: #dcebff;
+    border-color: #b8cff3;
+  }
+
+  .cine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .cine-card {
+    border: 1px solid #d7e4f7;
+    border-radius: 14px;
+    background: var(--cine-surface);
+    box-shadow: 0 10px 25px rgba(45, 93, 161, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cine-card-poster {
+    height: 190px;
+    border-bottom: 1px solid #d7e4f7;
+    background: #dce9ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cine-primary-dark);
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .cine-card-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cine-card-body {
+    padding: 14px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .cine-card-title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .cine-card-meta {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--cine-muted);
+  }
+
+  .cine-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cine-stars {
+    position: relative;
+    display: inline-block;
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 2px;
+    color: #c8d6ed;
+  }
+
+  .cine-stars-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #f2b928;
+  }
+
+  .cine-rating-value {
+    color: var(--cine-muted);
+    font-weight: 600;
+  }
+
+  .cine-card-line {
+    margin: 0;
+    color: #314c72;
+    font-size: 0.94rem;
+  }
+
+  .cine-card-line strong {
+    color: #173358;
+  }
+
+  .cine-card-actions {
+    padding: 0 14px 14px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .cine-btn-primary,
+  .cine-btn-secondary {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #a8c3eb;
+    padding: 9px 12px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .cine-btn-primary {
+    color: #0f3f79;
+    background: #d6e8ff;
+  }
+
+  .cine-btn-secondary {
+    color: #42587c;
+    background: #eff5ff;
+  }
+
+  .cine-empty {
+    border: 1px dashed #b8cdee;
+    border-radius: 14px;
+    background: #eff5ff;
+    padding: 28px;
+    text-align: center;
+  }
+
+  .cine-empty p {
+    margin-bottom: 12px;
+    color: var(--cine-muted);
+  }
+
+  @media (max-width: 992px) {
+    .cine-sidebar {
+      position: static;
+      width: auto;
+      height: auto;
+      margin: 0 16px;
+      border-radius: 18px;
+      border: 1px solid var(--cine-border);
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 16px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<aside class="cine-sidebar">
+  <a href="{% url 'home' %}" class="cine-brand">
+    <i class="fas fa-clapperboard"></i>
+    <span>Goodfilms</span>
+  </a>
+
+  <nav class="cine-nav">
+    <a href="{% url 'home' %}" class="cine-nav-link {% if modo == 'meus-filmes' %}active{% endif %}">
+      <i class="fas fa-film"></i> Meus Filmes
+    </a>
+    <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link {% if modo == 'recomendacoes' %}active{% endif %}">
+      <i class="fas fa-lightbulb"></i> Recomenda&ccedil;&otilde;es
+    </a>
+    <a href="{% url 'dashboard' %}" class="cine-nav-link">
+      <i class="fas fa-star"></i> Avaliados
+    </a>
+    <a href="{% url 'favoritos' %}" class="cine-nav-link">
+      <i class="fas fa-heart"></i> Favoritos
+    </a>
+  </nav>
+
+  <a href="{% url 'cadastro_de_filme' %}" class="cine-add-btn">
+    <i class="fas fa-plus"></i> Adicionar filme
+  </a>
+</aside>
+{% endblock %}
+
 {% block content %}
+<div class="cine-home-shell">
+  <header class="cine-topbar">
+    <div class="cine-topbar-left">
+      <a href="{% url 'home' %}" class="cine-logo">
+        <i class="fas fa-clapperboard"></i>
+        Goodfilms
+      </a>
 
+      <nav class="cine-tabs">
+        <a href="{% url 'home' %}" class="cine-tab {% if modo == 'meus-filmes' %}active{% endif %}">Meus Filmes</a>
+        <a href="{% url 'home' %}?modo=recomendacoes" class="cine-tab {% if modo == 'recomendacoes' %}active{% endif %}">Recomenda&ccedil;&otilde;es</a>
+        <a href="{% url 'dashboard' %}" class="cine-tab">Avaliados</a>
+        <a href="{% url 'favoritos' %}" class="cine-tab">Favoritos</a>
+      </nav>
+    </div>
 
-{% comment %} Barra para pesquiza de serviço {% endcomment %}
-<form class="search-bar" method="get" action="{% url 'home_user' %}">
-  <input type="text" name="q" placeholder="Nos diga o que deseja" value="{{ q }}">
-  <button class="btn btn-dark"><i class="fas fa-search"></i></button>
-</form>
+    <form class="cine-search-form" method="get" action="{% url 'home' %}">
+      {% if modo == 'recomendacoes' %}
+        <input type="hidden" name="modo" value="recomendacoes">
+      {% endif %}
+      <input type="text" name="q" placeholder="Buscar filme" value="{{ q }}">
+      <button type="submit" aria-label="Buscar">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </header>
 
-<h4 class="section-title">Serviços mais Pedidos</h4>
+  <section class="cine-panel">
+    <h1>{{ titulo_home }}</h1>
 
-<div class="row g-4">
-  {% for servico in servicos %}
-    <div class="col-md-4">
-      <div class="card card-service">
-        {% if servico.imagem_p %}
-          <img src="{{ servico.imagem_p.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-        {% else %}
-          <img src="{% static 'img/system/default_service_img.jpg' %}" class="card-img-top" style="height: 200px; object-fit: cover;">
-        {% endif %}
-        <div class="card-body">
-          <h5 class="card-title">{{ servico.titulo|default:'Sem título' }}</h5>
+    <div class="cine-subtabs">
+      <a href="{% url 'home' %}" class="cine-subtab {% if modo == 'meus-filmes' %}active{% endif %}">Meus Filmes</a>
+      <a href="{% url 'home' %}?modo=recomendacoes" class="cine-subtab {% if modo == 'recomendacoes' %}active{% endif %}">Recomenda&ccedil;&otilde;es</a>
+      <a href="{% url 'dashboard' %}" class="cine-subtab">Avaliados</a>
+      <a href="{% url 'favoritos' %}" class="cine-subtab">Favoritos</a>
+    </div>
 
-          {% if incluir_favoritos %}
-          <form method="POST" action="{% url 'favoritar' %}">
+    <div class="cine-grid">
+      {% for filme in filmes %}
+      <article class="cine-card">
+        <a class="cine-card-poster" href="{% url 'filme_detalhe' id=filme.id %}">
+          {% if filme.poster %}
+            <img src="{{ filme.poster.url }}" alt="{{ filme.titulo }}">
+          {% else %}
+            {{ filme.titulo|slice:":1"|upper }}
+          {% endif %}
+        </a>
+
+        <div class="cine-card-body">
+          <h3 class="cine-card-title">{{ filme.titulo }}</h3>
+          <p class="cine-card-meta">
+            {{ filme.genero|default:"Gênero indefinido" }}
+            {% if filme.ano_lancamento %} &bull; {{ filme.ano_lancamento }}{% endif %}
+          </p>
+
+          <div class="cine-rating-row">
+            <span class="cine-stars" aria-hidden="true">
+              &#9733;&#9733;&#9733;&#9733;&#9733;
+              <span class="cine-stars-fill" style="width: {{ filme.media_percentual|floatformat:0 }}%;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            </span>
+            <span class="cine-rating-value">{{ filme.media_nota|floatformat:1 }}</span>
+          </div>
+
+          <p class="cine-card-line">
+            <strong>Minha nota:</strong>
+            {% if filme.minha_nota %}{{ filme.minha_nota }}{% else %}-{% endif %}
+          </p>
+          <p class="cine-card-line">
+            <strong>Comentário:</strong> {{ filme.meu_comentario|default:"Sem comentário ainda."|truncatechars:55 }}
+          </p>
+        </div>
+
+        <div class="cine-card-actions">
+          <a href="{% url 'filme_detalhe' id=filme.id %}" class="cine-btn-primary">Ver detalhes</a>
+
+          <form method="post" action="{% url 'favoritar' %}">
             {% csrf_token %}
-            {% if servico in incluir_favoritos %}
-              <button type="submit" name="favoritar" value="{{ servico.id }},False" class="btn btn-link">
-                <i class="fas fa-heart text-danger"></i>
+            {% if filme.id in incluir_favoritos %}
+              <button type="submit" name="favoritar" value="{{ filme.id }},False" class="cine-btn-secondary">
+                <i class="fas fa-heart-crack"></i> Remover favorito
               </button>
             {% else %}
-              <button type="submit" name="favoritar" value="{{ servico.id }},True" class="btn btn-link">
-                <i class="far fa-heart"></i>
+              <button type="submit" name="favoritar" value="{{ filme.id }},True" class="cine-btn-secondary">
+                <i class="fas fa-heart"></i> Favoritar
               </button>
             {% endif %}
           </form>
-          {% endif %}
-
-          {% if button_info %}
-            <a href="{% url button_info.url id=servico.id %}" class="btn btn-warning w-100">{{ button_info.text }}</a>
-          {% else %}
-            <a href="{% url 'servico_detalhe' id=servico.id %}" class="btn btn-warning w-100">Consultar Serviço</a>
-          {% endif %}
         </div>
+      </article>
+      {% empty %}
+      <div class="cine-empty">
+        <p>Nenhum filme encontrado. Tente outro termo ou adicione um novo filme.</p>
+        <a href="{% url 'cadastro_de_filme' %}" class="cine-btn-primary">Adicionar filme</a>
       </div>
+      {% endfor %}
     </div>
-  {% empty %}
-    <p class="text-muted">Nenhum serviço disponível no momento.</p>
-  {% endfor %}
+  </section>
 </div>
-
 {% endblock %}
+
+{% block footer %}{% endblock %}

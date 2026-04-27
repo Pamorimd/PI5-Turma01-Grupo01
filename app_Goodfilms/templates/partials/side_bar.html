@@ -11,7 +11,7 @@
     <i class="fas fa-heart"></i> Favoritos
   </a>
 
-  <a href="{% url 'home_user' %}" class="{% if active_page == 'home_user' %}active{% endif %}">
+  <a href="{% url 'home' %}" class="{% if active_page == 'home' or active_page == 'home_user' %}active{% endif %}">
     <i class="fas fa-house"></i> Home
   </a>
 
