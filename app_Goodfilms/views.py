@@ -386,7 +386,7 @@ def perfil(request):
 
         imagem_p = request.FILES.get('input_image')
         if imagem_p is not None:
-            user.profile_image = imagem_p
+            pass
 
         user.save()
 

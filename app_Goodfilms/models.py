@@ -24,7 +24,6 @@ class CustomUser(AbstractBaseUser):
     username = models.CharField(max_length=150, unique=True)
     nome = models.CharField(max_length=150)
     email = models.EmailField(blank=True, null=True)
-    profile_image = models.ImageField(upload_to='perfil', blank=True, null=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
