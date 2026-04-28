@@ -331,27 +331,8 @@
     flex-direction: column;
   }
 
-  .cine-card-poster {
-    height: 190px;
-    border-bottom: 1px solid #d7e4f7;
-    background: #dce9ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--cine-primary-dark);
-    font-family: "Sora", "Segoe UI", sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-  }
-
-  .cine-card-poster img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
   .cine-card-body {
-    padding: 14px;
+    padding: 18px 14px 14px;
     display: grid;
     gap: 8px;
   }
@@ -496,7 +477,7 @@
     <a href="{% url 'dashboard' %}" class="cine-nav-link">
       <i class="fas fa-star"></i> Avaliados
     </a>
-    <a href="{% url 'favoritos' %}" class="cine-nav-link">
+    <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link {% if modo == 'favoritos' %}active{% endif %}">
       <i class="fas fa-heart"></i> Favoritos
     </a>
   </nav>
@@ -511,8 +492,8 @@
 <div class="cine-home-shell">
   <header class="cine-topbar">
     <form class="cine-search-form" method="get" action="{% url 'home' %}">
-      {% if modo == 'recomendacoes' %}
-        <input type="hidden" name="modo" value="recomendacoes">
+      {% if modo != 'meus-filmes' %}
+        <input type="hidden" name="modo" value="{{ modo }}">
       {% endif %}
       <input type="text" name="q" placeholder="Buscar filme" value="{{ q }}">
       <button type="submit" aria-label="Buscar">
@@ -549,20 +530,12 @@
       <a href="{% url 'home' %}" class="cine-subtab {% if modo == 'meus-filmes' %}active{% endif %}">Meus Filmes</a>
       <a href="{% url 'home' %}?modo=recomendacoes" class="cine-subtab {% if modo == 'recomendacoes' %}active{% endif %}">Recomenda&ccedil;&otilde;es</a>
       <a href="{% url 'dashboard' %}" class="cine-subtab">Avaliados</a>
-      <a href="{% url 'favoritos' %}" class="cine-subtab">Favoritos</a>
+      <a href="{% url 'home' %}?modo=favoritos" class="cine-subtab {% if modo == 'favoritos' %}active{% endif %}">Favoritos</a>
     </div>
 
     <div class="cine-grid">
       {% for filme in filmes %}
       <article class="cine-card">
-        <a class="cine-card-poster" href="{% url 'filme_detalhe' id=filme.id %}">
-          {% if filme.poster %}
-            <img src="{{ filme.poster.url }}" alt="{{ filme.titulo }}">
-          {% else %}
-            {{ filme.titulo|slice:":1"|upper }}
-          {% endif %}
-        </a>
-
         <div class="cine-card-body">
           <h3 class="cine-card-title">{{ filme.titulo }}</h3>
           <p class="cine-card-meta">

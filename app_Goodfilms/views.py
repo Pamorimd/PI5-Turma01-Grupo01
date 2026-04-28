@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
 from django.db.models.functions import Coalesce
+from django.urls import reverse
 
 from .forms import FilmeForm
 from .models import Filme, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
@@ -74,25 +75,11 @@ def dashboard(request):
 
 @login_required
 def favoritos(request):
-    user = request.user
-    query = request.GET.get('q', '')
-
-    favoritos_qs = Filme_favoritos.objects.filter(user=user).select_related('filme').order_by('-data_criacao')
-
+    query = request.GET.get('q', '').strip()
+    url = f"{reverse('home')}?modo=favoritos"
     if query:
-        favoritos_qs = favoritos_qs.filter(filme__titulo__icontains=query)
-
-    filmes_favoritos = [fav.filme for fav in favoritos_qs]
-
-    return render(request, Area_usuario + 'favoritos.html', {
-        'pagina': {
-            'name': 'Favoritos',
-            'code': 'favoritos'
-        },
-        'filmes_favoritos': filmes_favoritos,
-        'incluir_favoritos': _get_favoritos_ids(request.user),
-        'q': query
-    })
+        url = f"{url}&q={query}"
+    return redirect(url)
 
 
 @login_required
@@ -109,6 +96,7 @@ def amigos(request):
 def home_user(request):
     query = request.GET.get('q', '').strip()
     modo = request.GET.get('modo', 'meus-filmes').strip()
+    favoritos_ids = _get_favoritos_ids(request.user)
 
     avaliacao_usuario = Filme_avaliacao.objects.filter(
         user=request.user,
@@ -136,6 +124,9 @@ def home_user(request):
     if modo == 'recomendacoes':
         filmes = filmes.order_by('-media_nota', '-data_cadastro')
         titulo_home = 'Recomenda\u00e7\u00f5es'
+    elif modo == 'favoritos':
+        filmes = filmes.filter(id__in=favoritos_ids).order_by('-data_cadastro')
+        titulo_home = 'Favoritos'
     else:
         modo = 'meus-filmes'
         filmes = filmes.order_by('-data_cadastro')
@@ -148,7 +139,7 @@ def home_user(request):
             'intro': False,
         },
         'filmes': filmes,
-        'incluir_favoritos': _get_favoritos_ids(request.user),
+        'incluir_favoritos': favoritos_ids,
         'q': query,
         'modo': modo,
         'titulo_home': titulo_home,
@@ -407,6 +398,7 @@ def favoritar(request):
         if adicionar:
             filme = get_object_or_404(Filme, id=filme_id)
             Filme_favoritos.objects.get_or_create(user=user, filme=filme)
+            return redirect(f"{reverse('home')}?modo=favoritos")
         else:
             Filme_favoritos.objects.filter(user=user, filme__id=filme_id).delete()
 
