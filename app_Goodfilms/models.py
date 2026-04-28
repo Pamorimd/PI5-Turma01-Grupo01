@@ -42,6 +42,15 @@ class CustomUser(AbstractBaseUser):
 # Modelo de Filme (Antigo Servico)
 # ----------------------------
 class Filme(models.Model):
+    CLASSIFICACAO_CHOICES = [
+        ('Livre', 'Livre'),
+        ('10 anos', '10 anos'),
+        ('12 anos', '12 anos'),
+        ('14 anos', '14 anos'),
+        ('16 anos', '16 anos'),
+        ('18 anos', '18 anos'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     titulo = models.CharField(max_length=255)
     titulo_original = models.CharField(max_length=255, blank=True, null=True)
@@ -49,7 +58,12 @@ class Filme(models.Model):
     sinopse = models.TextField(blank=True, null=True)
     diretor = models.CharField(max_length=255, blank=True, null=True)
     ano_lancamento = models.IntegerField(null=True, blank=True)
-    duracao_minutos = models.IntegerField(default=0)
+    duracao_minutos = models.IntegerField(validators=[MinValueValidator(1)])
+    classificacao = models.CharField(
+        max_length=20,
+        choices=CLASSIFICACAO_CHOICES,
+        default='Livre',
+    )
     
     # Armazenar metadados extras (elenco, prêmios, etc)
     metadados = models.JSONField(blank=True, null=True) 

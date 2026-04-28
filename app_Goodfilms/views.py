@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
 from django.db.models.functions import Coalesce
 
+from .forms import FilmeForm
 from .models import Filme, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
 
 CustomUser = get_user_model()
@@ -212,17 +213,20 @@ def filme_detalhe(request, id):
 
 @login_required(login_url='login')
 def cadastro_de_filme(request):
-    user = request.user
-
     if request.method == 'POST':
-        send_filme(request, user)
-        return redirect('/home')
+        form = FilmeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = FilmeForm()
 
     return render(request, Area_usuario + 'cadastro_de_filme.html', {
         'pagina': {
             'name': 'Cadastro de filme',
             'code': 'cadastro_de_filme'
         },
+        'form': form,
     })
 
 
@@ -231,41 +235,21 @@ def editar_filme(request, id):
     filme = get_object_or_404(Filme, id=id)
 
     if request.method == 'POST':
-        user = request.user
-        send_filme(request, user, filme)
-        return redirect('/home')
+        form = FilmeForm(request.POST, instance=filme)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = FilmeForm(instance=filme)
 
     return render(request, Area_usuario + 'cadastro_de_filme.html', {
         'pagina': {
             'name': 'Editar filme',
             'code': 'editar_filme'
         },
-        'filme': filme
+        'filme': filme,
+        'form': form,
     })
-
-
-def send_filme(request, user, filme=None):
-    form = request.POST.dict()
-    imagem_p = request.FILES.get('input_image')
-
-    if imagem_p is not None:
-        form['imagem_p'] = imagem_p
-    else:
-        form.pop('input_image', None)
-
-    form.pop('csrfmiddlewaretoken', None)
-
-    # Dono do filme
-    form['user'] = user
-
-    if filme is not None:
-        for chave, valor in form.items():
-            setattr(filme, chave, valor)
-        filme.save()
-    else:
-        filme = Filme.objects.create(**form)
-
-    return filme
 
 
 # ----------------------------

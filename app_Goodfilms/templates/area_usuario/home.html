@@ -111,10 +111,10 @@
   }
 
   .cine-topbar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    gap: 14px;
     border: 1px solid var(--cine-border);
     border-radius: 16px;
     padding: 16px 20px;
@@ -174,7 +174,8 @@
   }
 
   .cine-search-form {
-    min-width: min(100%, 320px);
+    width: 100%;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -200,6 +201,79 @@
     border-radius: 10px;
     color: var(--cine-primary-dark);
     background: #e6f0ff;
+  }
+
+  .cine-user-menu {
+    justify-self: end;
+    position: relative;
+  }
+
+  .cine-user-toggle {
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #26364e;
+    border-radius: 6px;
+    background: var(--cine-surface);
+    color: #102947;
+    padding: 6px 10px;
+    text-align: left;
+  }
+
+  .cine-user-avatar {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    border: 1px solid #26364e;
+    border-radius: 50%;
+    color: #1f2d3d;
+    background: #ffffff;
+    font-size: 1.2rem;
+  }
+
+  .cine-user-text {
+    display: grid;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  .cine-user-text strong,
+  .cine-user-text small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cine-user-text strong {
+    font-weight: 700;
+  }
+
+  .cine-user-text small {
+    color: var(--cine-muted);
+    font-size: 0.82rem;
+  }
+
+  .cine-user-caret {
+    margin-left: auto;
+    font-size: 0.8rem;
+  }
+
+  .cine-user-dropdown {
+    min-width: 190px;
+    border: 1px solid var(--cine-border);
+    border-radius: 6px;
+    box-shadow: 0 12px 28px rgba(25, 51, 87, 0.16);
+  }
+
+  .cine-user-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 14px;
   }
 
   .cine-panel {
@@ -387,6 +461,20 @@
       margin-left: 0;
       padding: 16px;
     }
+
+    .cine-topbar {
+      grid-template-columns: 1fr;
+    }
+
+    .cine-search-form,
+    .cine-user-menu,
+    .cine-user-toggle {
+      width: 100%;
+    }
+
+    .cine-user-menu {
+      justify-self: stretch;
+    }
   }
 </style>
 {% endblock %}
@@ -422,13 +510,6 @@
 {% block content %}
 <div class="cine-home-shell">
   <header class="cine-topbar">
-    <div class="cine-topbar-left">
-      <a href="{% url 'home' %}" class="cine-logo">
-        <i class="fas fa-clapperboard"></i>
-        Goodfilms
-      </a>
-    </div>
-
     <form class="cine-search-form" method="get" action="{% url 'home' %}">
       {% if modo == 'recomendacoes' %}
         <input type="hidden" name="modo" value="recomendacoes">
@@ -438,6 +519,27 @@
         <i class="fas fa-search"></i>
       </button>
     </form>
+
+    <div class="cine-user-menu dropdown">
+      <button class="cine-user-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="cine-user-avatar" aria-hidden="true">
+          <i class="fas fa-user"></i>
+        </span>
+        <span class="cine-user-text">
+          <strong>{{ user.nome|default:user.username }}</strong>
+          <small>{{ user.email|default:"email nao informado" }}</small>
+        </span>
+        <i class="fas fa-caret-down cine-user-caret" aria-hidden="true"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end cine-user-dropdown">
+        <li>
+          <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt"></i>
+            Sair
+          </a>
+        </li>
+      </ul>
+    </div>
   </header>
 
   <section class="cine-panel">

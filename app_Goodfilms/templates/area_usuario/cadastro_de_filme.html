@@ -108,36 +108,6 @@
     gap: 16px;
   }
 
-  .cine-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    border: 1px solid var(--cine-border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(3px);
-  }
-
-  .cine-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--cine-primary);
-    font-family: "Sora", "Segoe UI", sans-serif;
-    font-size: 1.85rem;
-    font-weight: 700;
-    line-height: 1;
-    text-decoration: none;
-  }
-
-  .cine-topbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
   .cine-voltar {
     border: 1px solid #adc6ec;
     border-radius: 10px;
@@ -200,6 +170,24 @@
     color: #34557f;
     font-weight: 600;
     font-size: 0.92rem;
+  }
+
+  .cine-required,
+  .cine-error {
+    color: #dc3545;
+  }
+
+  .cine-error {
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .cine-form-errors {
+    border: 1px solid #f1b4bb;
+    border-radius: 10px;
+    background: #fff1f3;
+    color: #9f2330;
+    padding: 10px 12px;
   }
 
   .cine-field input,
@@ -299,91 +287,110 @@
 </aside>
 {% endblock %}
 
+{% block menu_superior %}
+<div class="topbar d-flex justify-content-between align-items-center mb-4">
+  <h2 class="me-4 mb-0">{{ pagina.name }}</h2>
+  <a href="{% url 'home' %}" class="cine-voltar">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="cine-home-shell">
-  <header class="cine-topbar">
-    <a href="{% url 'home' %}" class="cine-logo">
-      <i class="fas fa-clapperboard"></i>
-      Goodfilms
-    </a>
-
-    <div class="cine-topbar-actions">
-      <a href="{% url 'home' %}" class="cine-voltar"><i class="fas fa-arrow-left"></i> Voltar</a>
-    </div>
-  </header>
-
   <section class="cine-panel">
     <div class="cine-title">
       <i class="fas fa-plus-square" aria-hidden="true"></i>
       <h1>{% if filme %}Editar Filme{% else %}Adicionar Filme{% endif %}</h1>
     </div>
     <p class="cine-subtitle">
-      Esta tela est&aacute; em modo mock. Os campos s&atilde;o visuais por enquanto e n&atilde;o salvam no banco.
+      Campos marcados com <span class="cine-required">*</span> s&atilde;o obrigat&oacute;rios.
     </p>
 
-    <form class="cine-form-grid" id="mockForm" onsubmit="return false;">
+    <form class="cine-form-grid" method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="cine-form-errors">
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       <div class="cine-form-main">
         <div class="cine-field">
-          <label for="titulo">T&iacute;tulo</label>
-          <input id="titulo" type="text" value="{{ filme.titulo|default:'' }}" placeholder="Ex: Interestelar">
+          <label for="titulo">T&iacute;tulo <span class="cine-required">*</span></label>
+          <input id="titulo" name="titulo" type="text" value="{{ form.titulo.value|default_if_none:'' }}" placeholder="Ex: Interestelar" required>
+          {% for error in form.titulo.errors %}
+            <span class="cine-error">{{ error }}</span>
+          {% endfor %}
         </div>
 
         <div class="cine-row">
           <div class="cine-field">
-            <label for="titulo_original">T&iacute;tulo original</label>
-            <input id="titulo_original" type="text" value="{{ filme.titulo_original|default:'' }}" placeholder="Original title">
+            <label for="genero">G&ecirc;nero <span class="cine-required">*</span></label>
+            <input id="genero" name="genero" type="text" value="{{ form.genero.value|default_if_none:'' }}" placeholder="Drama, Sci-Fi, A&ccedil;&atilde;o..." required>
+            {% for error in form.genero.errors %}
+              <span class="cine-error">{{ error }}</span>
+            {% endfor %}
           </div>
           <div class="cine-field">
-            <label for="genero">G&ecirc;nero</label>
-            <input id="genero" type="text" value="{{ filme.genero|default:'' }}" placeholder="Drama, Sci-Fi, A&ccedil;&atilde;o...">
+            <label for="duracao_minutos">Dura&ccedil;&atilde;o (min) <span class="cine-required">*</span></label>
+            <input id="duracao_minutos" name="duracao_minutos" type="number" value="{{ form.duracao_minutos.value|default_if_none:'' }}" placeholder="120" min="1" required>
+            {% for error in form.duracao_minutos.errors %}
+              <span class="cine-error">{{ error }}</span>
+            {% endfor %}
           </div>
         </div>
 
         <div class="cine-row">
+          <div class="cine-field">
+            <label for="classificacao">Classifica&ccedil;&atilde;o <span class="cine-required">*</span></label>
+            <select id="classificacao" name="classificacao" required>
+              {% for value, label in form.classificacao.field.choices %}
+                <option value="{{ value }}" {% if form.classificacao.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            {% for error in form.classificacao.errors %}
+              <span class="cine-error">{{ error }}</span>
+            {% endfor %}
+          </div>
           <div class="cine-field">
             <label for="diretor">Diretor</label>
-            <input id="diretor" type="text" value="{{ filme.diretor|default:'' }}" placeholder="Nome do diretor">
-          </div>
-          <div class="cine-field">
-            <label for="ano_lancamento">Ano de lan&ccedil;amento</label>
-            <input id="ano_lancamento" type="number" value="{{ filme.ano_lancamento|default:'' }}" placeholder="2026" min="1900" max="2100">
+            <input id="diretor" name="diretor" type="text" value="{{ form.diretor.value|default_if_none:'' }}" placeholder="Nome do diretor">
+            {% for error in form.diretor.errors %}
+              <span class="cine-error">{{ error }}</span>
+            {% endfor %}
           </div>
         </div>
 
-        <div class="cine-row">
-          <div class="cine-field">
-            <label for="duracao">Dura&ccedil;&atilde;o (min)</label>
-            <input id="duracao" type="number" value="{{ filme.duracao_minutos|default:'' }}" placeholder="120" min="1">
-          </div>
-          <div class="cine-field">
-            <label for="classificacao">Classifica&ccedil;&atilde;o</label>
-            <select id="classificacao">
-              <option>Livre</option>
-              <option>10 anos</option>
-              <option>12 anos</option>
-              <option>14 anos</option>
-              <option>16 anos</option>
-              <option>18 anos</option>
-            </select>
-          </div>
+        <div class="cine-field">
+          <label for="ano_lancamento">Ano de lan&ccedil;amento</label>
+          <input id="ano_lancamento" name="ano_lancamento" type="number" value="{{ form.ano_lancamento.value|default_if_none:'' }}" placeholder="2026" min="1900" max="2100">
+          {% for error in form.ano_lancamento.errors %}
+            <span class="cine-error">{{ error }}</span>
+          {% endfor %}
         </div>
 
         <div class="cine-field">
           <label for="sinopse">Sinopse</label>
-          <textarea id="sinopse" placeholder="Descreva rapidamente o filme...">{{ filme.sinopse|default:'' }}</textarea>
+          <textarea id="sinopse" name="sinopse" placeholder="Descreva rapidamente o filme...">{{ form.sinopse.value|default_if_none:'' }}</textarea>
+          {% for error in form.sinopse.errors %}
+            <span class="cine-error">{{ error }}</span>
+          {% endfor %}
         </div>
       </div>
 
+      <div class="cine-actions">
+        <a href="{% url 'home' %}" class="cine-btn cine-btn-secondary">
+          <i class="fas fa-times"></i> Cancelar
+        </a>
+        <button type="submit" class="cine-btn cine-btn-primary">
+          <i class="fas fa-check"></i> Salvar
+        </button>
+      </div>
     </form>
-
-    <div class="cine-actions">
-      <a href="{% url 'home' %}" class="cine-btn cine-btn-secondary">
-        <i class="fas fa-times"></i> Cancelar
-      </a>
-      <button type="button" class="cine-btn cine-btn-primary">
-        <i class="fas fa-check"></i> Salvar
-      </button>
-    </div>
   </section>
 </div>
 {% endblock %}
