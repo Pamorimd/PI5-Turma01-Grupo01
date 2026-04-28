@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
+from django.db.models import Avg, Count, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 
 from .forms import FilmeForm
-from .models import Filme, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
+from .models import Filme, Filme_assistido, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
 
 CustomUser = get_user_model()
 
@@ -26,6 +26,27 @@ def _get_favoritos_ids(user):
     return list(
         Filme_favoritos.objects.filter(user=user).values_list('filme_id', flat=True)
     )
+
+
+def _formatar_duracao(minutos):
+    if not minutos:
+        return 'Duracao nao informada'
+
+    horas = minutos // 60
+    minutos_restantes = minutos % 60
+
+    if horas and minutos_restantes:
+        return f'{horas}h{minutos_restantes:02d}min'
+    if horas:
+        return f'{horas}h'
+    return f'{minutos_restantes}min'
+
+
+def _safe_next_url(request, fallback):
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url and next_url.startswith('/'):
+        return next_url
+    return fallback
 
 
 # ----------------------------
@@ -187,18 +208,67 @@ def configuracoes(request):
 # Páginas de filmes
 # ----------------------------
 
+@login_required(login_url='login')
 def filme_detalhe(request, id):
     filme = get_object_or_404(Filme, id=id)
-    user = request.user if request.user.is_authenticated else None
+
+    if request.method == 'POST':
+        acao = request.POST.get('acao')
+
+        if acao == 'avaliar':
+            nota = request.POST.get('nota')
+            comentario = (request.POST.get('comentario') or '').strip()
+
+            if nota and nota.isdigit() and 1 <= int(nota) <= 5:
+                Filme_avaliacao.objects.update_or_create(
+                    user=request.user,
+                    filme=filme,
+                    defaults={
+                        'nota': int(nota),
+                        'comentario': comentario,
+                    },
+                )
+
+        elif acao == 'status':
+            status = request.POST.get('status')
+            if status == 'assistido':
+                Filme_assistido.objects.get_or_create(user=request.user, filme=filme)
+            else:
+                Filme_assistido.objects.filter(user=request.user, filme=filme).delete()
+
+        return redirect('filme_detalhe', id=filme.id)
 
     Filme_visualizacao.objects.create(
-        user=user,
+        user=request.user,
         filme=filme,
     )
 
-    return render(request, 'filme_detalhe.html', {
+    avaliacao_usuario = Filme_avaliacao.objects.filter(
+        user=request.user,
+        filme=filme,
+    ).first()
+    resumo_avaliacoes = filme.avaliacoes.aggregate(
+        media=Coalesce(Avg('nota'), Value(0.0)),
+        total=Count('id'),
+    )
+    media_nota = resumo_avaliacoes['media'] or 0
+    favoritos_ids = _get_favoritos_ids(request.user)
+
+    return render(request, Area_usuario + 'filme_detalhe.html', {
+        'pagina': {
+            'name': filme.titulo,
+            'code': 'filme_detalhe',
+            'intro': False,
+        },
         'filme': filme,
-        'incluir_favoritos': _get_favoritos_ids(request.user),
+        'incluir_favoritos': favoritos_ids,
+        'is_favorito': filme.id in favoritos_ids,
+        'is_assistido': Filme_assistido.objects.filter(user=request.user, filme=filme).exists(),
+        'minha_avaliacao': avaliacao_usuario,
+        'media_nota': media_nota,
+        'media_percentual': media_nota * 20,
+        'total_avaliacoes': resumo_avaliacoes['total'],
+        'duracao_label': _formatar_duracao(filme.duracao_minutos),
     })
 
 
@@ -388,9 +458,11 @@ def favoritar(request):
         user = request.user
         valor = request.POST.get('favoritar', '')
         dados = valor.split(',')
+        fallback_url = request.META.get('HTTP_REFERER', '/')
+        next_url = _safe_next_url(request, fallback_url)
 
         if len(dados) != 2:
-            return redirect(request.META.get('HTTP_REFERER', '/'))
+            return redirect(next_url)
 
         filme_id = dados[0]
         adicionar = dados[1] == 'True'
@@ -398,10 +470,12 @@ def favoritar(request):
         if adicionar:
             filme = get_object_or_404(Filme, id=filme_id)
             Filme_favoritos.objects.get_or_create(user=user, filme=filme)
+            if request.POST.get('next'):
+                return redirect(next_url)
             return redirect(f"{reverse('home')}?modo=favoritos")
         else:
             Filme_favoritos.objects.filter(user=user, filme__id=filme_id).delete()
 
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return redirect(next_url)
 
     return render(request, '404.html', status=404)

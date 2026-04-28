@@ -1,0 +1,712 @@
+{% extends "area_usuario/base.html" %}
+
+{% block title %}{{ filme.titulo }} - Goodfilms{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cine-bg: #e9f1ff;
+    --cine-panel: #f8fbff;
+    --cine-surface: #ffffff;
+    --cine-primary: #4a84d7;
+    --cine-primary-dark: #2e5d9d;
+    --cine-text: #193357;
+    --cine-muted: #6a7e9c;
+    --cine-border: #cddcf3;
+    --cine-shadow: 0 16px 34px rgba(45, 93, 161, 0.12);
+  }
+
+  body {
+    background: radial-gradient(circle at 0 0, #f7fbff 0%, #e8f1ff 36%, #e9f1ff 100%);
+    font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    color: var(--cine-text);
+  }
+
+  .main-content {
+    margin-left: 300px;
+    min-height: 100vh;
+    padding: 26px 28px 30px;
+    background: transparent;
+  }
+
+  .cine-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    border-right: 1px solid var(--cine-border);
+    background: linear-gradient(170deg, #e7f1ff 0%, #dbe9ff 100%);
+    padding: 24px 20px;
+    z-index: 10;
+  }
+
+  .cine-brand,
+  .cine-nav-link,
+  .cine-add-btn,
+  .cine-voltar,
+  .cine-btn {
+    text-decoration: none;
+  }
+
+  .cine-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    color: var(--cine-primary-dark);
+  }
+
+  .cine-brand i {
+    font-size: 1.6rem;
+  }
+
+  .cine-brand span {
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+
+  .cine-nav {
+    display: grid;
+    gap: 10px;
+  }
+
+  .cine-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    color: var(--cine-primary-dark);
+    font-weight: 600;
+  }
+
+  .cine-nav-link:hover,
+  .cine-nav-link.active {
+    background: var(--cine-surface);
+    box-shadow: 0 8px 22px rgba(74, 132, 215, 0.14);
+  }
+
+  .cine-add-btn {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 14px;
+    background: var(--cine-surface);
+    color: var(--cine-primary-dark);
+    font-weight: 700;
+    padding: 12px 14px;
+    box-shadow: 0 8px 22px rgba(74, 132, 215, 0.14);
+  }
+
+  .cine-detail-shell {
+    display: grid;
+    gap: 16px;
+  }
+
+  .cine-topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--cine-border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(3px);
+  }
+
+  .cine-search-form {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cine-surface);
+    border: 1px solid var(--cine-border);
+    border-radius: 12px;
+    padding: 6px 8px 6px 14px;
+  }
+
+  .cine-search-form input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--cine-text);
+  }
+
+  .cine-search-form button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    color: var(--cine-primary-dark);
+    background: #e6f0ff;
+  }
+
+  .cine-user-toggle {
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #26364e;
+    border-radius: 6px;
+    background: var(--cine-surface);
+    color: #102947;
+    padding: 6px 10px;
+    text-align: left;
+  }
+
+  .cine-user-avatar {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    border: 1px solid #26364e;
+    border-radius: 50%;
+  }
+
+  .cine-user-text {
+    display: grid;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  .cine-user-text strong,
+  .cine-user-text small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cine-user-text small {
+    color: var(--cine-muted);
+    font-size: 0.82rem;
+  }
+
+  .cine-user-caret {
+    margin-left: auto;
+    font-size: 0.8rem;
+  }
+
+  .cine-user-dropdown {
+    min-width: 190px;
+    border: 1px solid var(--cine-border);
+    border-radius: 6px;
+    box-shadow: 0 12px 28px rgba(25, 51, 87, 0.16);
+  }
+
+  .cine-voltar {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #adc6ec;
+    border-radius: 10px;
+    background: #f1f7ff;
+    color: #2f5f9f;
+    font-weight: 700;
+    padding: 10px 14px;
+  }
+
+  .cine-detail-panel {
+    border: 1px solid var(--cine-border);
+    border-radius: 18px;
+    background: rgba(248, 251, 255, 0.88);
+    box-shadow: var(--cine-shadow);
+    padding: 28px;
+  }
+
+  .cine-detail-header {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .cine-detail-title {
+    margin: 0;
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: clamp(1.9rem, 3vw, 2.8rem);
+    color: #0f2a4d;
+  }
+
+  .cine-chips,
+  .cine-rating-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .cine-chip {
+    border-radius: 9px;
+    background: #e8f0ff;
+    color: #2f5f9f;
+    padding: 8px 14px;
+    font-weight: 700;
+  }
+
+  .cine-chip.classificacao {
+    color: #157347;
+    background: #d9f3e4;
+  }
+
+  .cine-stars,
+  .cine-stars-fill {
+    display: inline-block;
+    letter-spacing: 1px;
+  }
+
+  .cine-stars {
+    position: relative;
+    color: #c8d7ee;
+    font-size: 1.45rem;
+    line-height: 1;
+  }
+
+  .cine-stars-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    overflow: hidden;
+    color: #f6b800;
+    white-space: nowrap;
+  }
+
+  .cine-rating-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .cine-rating-count {
+    color: var(--cine-muted);
+  }
+
+  .cine-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .cine-info-list {
+    display: grid;
+  }
+
+  .cine-info-item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #dce7f7;
+  }
+
+  .cine-info-icon {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #e7f0ff;
+    color: var(--cine-primary-dark);
+  }
+
+  .cine-info-label {
+    display: block;
+    margin-bottom: 3px;
+    font-weight: 700;
+    color: #193357;
+  }
+
+  .cine-info-value {
+    color: #557094;
+  }
+
+  .cine-synopsis {
+    border: 1px solid var(--cine-border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.48);
+    padding: 22px;
+    color: #455f83;
+    line-height: 1.6;
+  }
+
+  .cine-synopsis h2,
+  .cine-user-section h2 {
+    margin: 0 0 12px;
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.25rem;
+    color: #21456f;
+  }
+
+  .cine-user-section {
+    margin-top: 26px;
+    border-top: 1px solid #dce7f7;
+    padding-top: 22px;
+  }
+
+  .cine-user-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.8fr 0.9fr;
+    gap: 18px;
+  }
+
+  .cine-user-card {
+    min-width: 0;
+    border-right: 1px solid #dce7f7;
+    padding-right: 18px;
+  }
+
+  .cine-user-card:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
+
+  .cine-user-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #21456f;
+    font-weight: 700;
+  }
+
+  .cine-rate-stars {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .cine-rate-stars input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cine-rate-stars label {
+    color: #b9c9e3;
+    cursor: pointer;
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  .cine-rate-stars input:checked ~ label,
+  .cine-rate-stars label:hover,
+  .cine-rate-stars label:hover ~ label {
+    color: #f6b800;
+  }
+
+  .cine-comment,
+  .cine-status-select {
+    width: 100%;
+    border: 1px solid #bdd1ee;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #14345d;
+    outline: none;
+  }
+
+  .cine-comment {
+    min-height: 76px;
+    margin-top: 8px;
+    padding: 9px 10px;
+    resize: vertical;
+  }
+
+  .cine-status-select {
+    padding: 10px 12px;
+  }
+
+  .cine-muted {
+    color: var(--cine-muted);
+  }
+
+  .cine-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    border: 1px solid #adc6ec;
+    border-radius: 10px;
+    background: #d6e8ff;
+    color: #0f3f79;
+    font-weight: 700;
+    padding: 9px 12px;
+  }
+
+  .cine-btn.secondary {
+    background: #edf5ff;
+  }
+
+  .cine-meta-footer {
+    margin-top: 24px;
+    color: var(--cine-muted);
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 992px) {
+    .cine-sidebar {
+      position: static;
+      width: auto;
+      height: auto;
+      margin: 0 16px;
+      border-radius: 18px;
+      border: 1px solid var(--cine-border);
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 16px;
+    }
+
+    .cine-topbar,
+    .cine-main-grid,
+    .cine-user-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cine-user-toggle,
+    .cine-user-menu {
+      width: 100%;
+    }
+
+    .cine-user-card {
+      border-right: none;
+      border-bottom: 1px solid #dce7f7;
+      padding-right: 0;
+      padding-bottom: 16px;
+    }
+
+    .cine-user-card:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<aside class="cine-sidebar">
+  <a href="{% url 'home' %}" class="cine-brand">
+    <i class="fas fa-clapperboard"></i>
+    <span>Goodfilms</span>
+  </a>
+
+  <nav class="cine-nav">
+    <a href="{% url 'home' %}" class="cine-nav-link">
+      <i class="fas fa-film"></i> Meus Filmes
+    </a>
+    <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link">
+      <i class="fas fa-lightbulb"></i> Recomenda&ccedil;&otilde;es
+    </a>
+    <a href="{% url 'dashboard' %}" class="cine-nav-link">
+      <i class="fas fa-star"></i> Avaliados
+    </a>
+    <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link">
+      <i class="fas fa-heart"></i> Favoritos
+    </a>
+  </nav>
+
+  <a href="{% url 'cadastro_de_filme' %}" class="cine-add-btn">
+    <i class="fas fa-plus"></i> Adicionar filme
+  </a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<div class="cine-detail-shell">
+  <header class="cine-topbar">
+    <form class="cine-search-form" method="get" action="{% url 'home' %}">
+      <input type="text" name="q" placeholder="Buscar filme">
+      <button type="submit" aria-label="Buscar">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+
+    <div class="cine-user-menu dropdown">
+      <button class="cine-user-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="cine-user-avatar" aria-hidden="true">
+          <i class="fas fa-user"></i>
+        </span>
+        <span class="cine-user-text">
+          <strong>{{ user.nome|default:user.username }}</strong>
+          <small>{{ user.email|default:"email nao informado" }}</small>
+        </span>
+        <i class="fas fa-caret-down cine-user-caret" aria-hidden="true"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end cine-user-dropdown">
+        <li>
+          <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt"></i>
+            Sair
+          </a>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <a href="{% url 'home' %}" class="cine-voltar">
+    <i class="fas fa-arrow-left"></i>
+    Voltar
+  </a>
+
+  <section class="cine-detail-panel">
+    <header class="cine-detail-header">
+      <div>
+        <h1 class="cine-detail-title">{{ filme.titulo }}</h1>
+      </div>
+
+      <div class="cine-chips">
+        <span class="cine-chip">{{ filme.ano_lancamento|default:"Ano nao informado" }}</span>
+        <span class="cine-chip">{{ duracao_label }}</span>
+        <span class="cine-chip classificacao">{{ filme.classificacao|default:"Livre" }}</span>
+      </div>
+
+      <div class="cine-rating-summary">
+        <span class="cine-stars" aria-hidden="true">
+          &#9733;&#9733;&#9733;&#9733;&#9733;
+          <span class="cine-stars-fill" style="width: {{ media_percentual|floatformat:0 }}%;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+        </span>
+        <span class="cine-rating-number">{{ media_nota|floatformat:1 }}</span>
+        <span class="cine-rating-count">({{ total_avaliacoes }} avalia&ccedil;&otilde;es)</span>
+      </div>
+    </header>
+
+    <div class="cine-main-grid">
+      <div class="cine-info-list">
+        <div class="cine-info-item">
+          <span class="cine-info-icon"><i class="fas fa-tag"></i></span>
+          <div>
+            <span class="cine-info-label">G&ecirc;nero</span>
+            <span class="cine-info-value">{{ filme.genero|default:"Genero nao informado" }}</span>
+          </div>
+        </div>
+
+        <div class="cine-info-item">
+          <span class="cine-info-icon"><i class="fas fa-user-tie"></i></span>
+          <div>
+            <span class="cine-info-label">Diretor</span>
+            <span class="cine-info-value">{{ filme.diretor|default:"Diretor nao informado" }}</span>
+          </div>
+        </div>
+
+        <div class="cine-info-item">
+          <span class="cine-info-icon"><i class="fas fa-calendar-days"></i></span>
+          <div>
+            <span class="cine-info-label">Ano de lan&ccedil;amento</span>
+            <span class="cine-info-value">{{ filme.ano_lancamento|default:"Ano nao informado" }}</span>
+          </div>
+        </div>
+
+        <div class="cine-info-item">
+          <span class="cine-info-icon"><i class="fas fa-shield-halved"></i></span>
+          <div>
+            <span class="cine-info-label">Classifica&ccedil;&atilde;o</span>
+            <span class="cine-info-value">{{ filme.classificacao|default:"Livre" }}</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="cine-synopsis">
+        <h2>Sinopse</h2>
+        <p>{{ filme.sinopse|default:"Sinopse nao informada."|linebreaksbr }}</p>
+      </aside>
+    </div>
+
+    <section class="cine-user-section">
+      <h2>Minhas informa&ccedil;&otilde;es</h2>
+
+      <div class="cine-user-grid">
+        <form class="cine-user-card" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="avaliar">
+          <div class="cine-user-card-title">
+            <i class="far fa-star"></i>
+            Minha nota
+          </div>
+          <div class="cine-rate-stars" aria-label="Minha nota">
+            <input type="radio" id="nota5" name="nota" value="5" {% if minha_avaliacao.nota == 5 %}checked{% endif %}>
+            <label for="nota5" title="5 estrelas">&#9733;</label>
+            <input type="radio" id="nota4" name="nota" value="4" {% if minha_avaliacao.nota == 4 %}checked{% endif %}>
+            <label for="nota4" title="4 estrelas">&#9733;</label>
+            <input type="radio" id="nota3" name="nota" value="3" {% if minha_avaliacao.nota == 3 %}checked{% endif %}>
+            <label for="nota3" title="3 estrelas">&#9733;</label>
+            <input type="radio" id="nota2" name="nota" value="2" {% if minha_avaliacao.nota == 2 %}checked{% endif %}>
+            <label for="nota2" title="2 estrelas">&#9733;</label>
+            <input type="radio" id="nota1" name="nota" value="1" {% if minha_avaliacao.nota == 1 %}checked{% endif %}>
+            <label for="nota1" title="1 estrela">&#9733;</label>
+          </div>
+          <textarea class="cine-comment" name="comentario" placeholder="Coment&aacute;rio opcional">{{ minha_avaliacao.comentario|default_if_none:'' }}</textarea>
+          <button class="cine-btn" type="submit">
+            <i class="fas fa-check"></i>
+            Salvar avalia&ccedil;&atilde;o
+          </button>
+        </form>
+
+        <div class="cine-user-card">
+          <div class="cine-user-card-title">
+            <i class="{% if is_favorito %}fas{% else %}far{% endif %} fa-heart"></i>
+            Favorito
+          </div>
+          <p class="cine-muted">
+            {% if is_favorito %}
+              Filme adicionado aos favoritos.
+            {% else %}
+              Adicionar aos favoritos.
+            {% endif %}
+          </p>
+          <form method="post" action="{% url 'favoritar' %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            {% if is_favorito %}
+              <button class="cine-btn secondary" type="submit" name="favoritar" value="{{ filme.id }},False">
+                <i class="fas fa-heart-crack"></i>
+                Remover favorito
+              </button>
+            {% else %}
+              <button class="cine-btn secondary" type="submit" name="favoritar" value="{{ filme.id }},True">
+                <i class="fas fa-heart"></i>
+                Favoritar
+              </button>
+            {% endif %}
+          </form>
+        </div>
+
+        <form class="cine-user-card" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="status">
+          <div class="cine-user-card-title">
+            <i class="fas fa-clapperboard"></i>
+            Status
+          </div>
+          <select class="cine-status-select" name="status">
+            <option value="nao_assistido" {% if not is_assistido %}selected{% endif %}>Nao assistido</option>
+            <option value="assistido" {% if is_assistido %}selected{% endif %}>Assistido</option>
+          </select>
+          <button class="cine-btn" type="submit">
+            <i class="fas fa-check"></i>
+            Salvar status
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <p class="cine-meta-footer">
+      Adicionado em {{ filme.data_cadastro|date:"d/m/Y" }}
+    </p>
+  </section>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
