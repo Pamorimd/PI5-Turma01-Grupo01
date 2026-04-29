@@ -135,7 +135,11 @@ def home_user(request):
             media_percentual=ExpressionWrapper(
                 F('media_nota') * Value(20.0),
                 output_field=FloatField(),
-            )
+            ),
+            minha_nota_percentual=ExpressionWrapper(
+                Coalesce(F('minha_nota'), Value(0)) * Value(20.0),
+                output_field=FloatField(),
+            ),
         )
     )
 
@@ -145,6 +149,14 @@ def home_user(request):
     if modo == 'recomendacoes':
         filmes = filmes.order_by('-media_nota', '-data_cadastro')
         titulo_home = 'Recomenda\u00e7\u00f5es'
+    elif modo == 'avaliados':
+        filmes = (
+            filmes
+            .filter(avaliacoes__user=request.user)
+            .order_by('-avaliacoes__data_criacao', '-data_cadastro')
+            .distinct()
+        )
+        titulo_home = 'Avaliados'
     elif modo == 'favoritos':
         filmes = filmes.filter(id__in=favoritos_ids).order_by('-data_cadastro')
         titulo_home = 'Favoritos'

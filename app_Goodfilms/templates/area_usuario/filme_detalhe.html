@@ -510,7 +510,7 @@
     <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link">
       <i class="fas fa-lightbulb"></i> Recomenda&ccedil;&otilde;es
     </a>
-    <a href="{% url 'dashboard' %}" class="cine-nav-link">
+    <a href="{% url 'home' %}?modo=avaliados" class="cine-nav-link">
       <i class="fas fa-star"></i> Avaliados
     </a>
     <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link">
@@ -541,7 +541,7 @@
         </span>
         <span class="cine-user-text">
           <strong>{{ user.nome|default:user.username }}</strong>
-          <small>{{ user.email|default:"email nao informado" }}</small>
+          <small>{{ user.email|default:"e-mail n&atilde;o informado" }}</small>
         </span>
         <i class="fas fa-caret-down cine-user-caret" aria-hidden="true"></i>
       </button>
@@ -568,7 +568,7 @@
       </div>
 
       <div class="cine-chips">
-        <span class="cine-chip">{{ filme.ano_lancamento|default:"Ano nao informado" }}</span>
+        <span class="cine-chip">{{ filme.ano_lancamento|default:"Ano n&atilde;o informado" }}</span>
         <span class="cine-chip">{{ duracao_label }}</span>
         <span class="cine-chip classificacao">{{ filme.classificacao|default:"Livre" }}</span>
       </div>
@@ -589,7 +589,7 @@
           <span class="cine-info-icon"><i class="fas fa-tag"></i></span>
           <div>
             <span class="cine-info-label">G&ecirc;nero</span>
-            <span class="cine-info-value">{{ filme.genero|default:"Genero nao informado" }}</span>
+            <span class="cine-info-value">{{ filme.genero|default:"G&ecirc;nero n&atilde;o informado" }}</span>
           </div>
         </div>
 
@@ -597,7 +597,7 @@
           <span class="cine-info-icon"><i class="fas fa-user-tie"></i></span>
           <div>
             <span class="cine-info-label">Diretor</span>
-            <span class="cine-info-value">{{ filme.diretor|default:"Diretor nao informado" }}</span>
+            <span class="cine-info-value">{{ filme.diretor|default:"Diretor n&atilde;o informado" }}</span>
           </div>
         </div>
 
@@ -605,7 +605,7 @@
           <span class="cine-info-icon"><i class="fas fa-calendar-days"></i></span>
           <div>
             <span class="cine-info-label">Ano de lan&ccedil;amento</span>
-            <span class="cine-info-value">{{ filme.ano_lancamento|default:"Ano nao informado" }}</span>
+            <span class="cine-info-value">{{ filme.ano_lancamento|default:"Ano n&atilde;o informado" }}</span>
           </div>
         </div>
 
@@ -620,7 +620,7 @@
 
       <aside class="cine-synopsis">
         <h2>Sinopse</h2>
-        <p>{{ filme.sinopse|default:"Sinopse nao informada."|linebreaksbr }}</p>
+        <p>{{ filme.sinopse|default:"Sinopse n&atilde;o informada."|linebreaksbr }}</p>
       </aside>
     </div>
 
@@ -691,7 +691,7 @@
             Status
           </div>
           <select class="cine-status-select" name="status">
-            <option value="nao_assistido" {% if not is_assistido %}selected{% endif %}>Nao assistido</option>
+            <option value="nao_assistido" {% if not is_assistido %}selected{% endif %}>N&atilde;o assistido</option>
             <option value="assistido" {% if is_assistido %}selected{% endif %}>Assistido</option>
           </select>
           <button class="cine-btn" type="submit">

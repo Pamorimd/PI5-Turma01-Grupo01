@@ -321,6 +321,99 @@
     gap: 18px;
   }
 
+  .cine-rated-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .cine-rated-card {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 14px;
+    border: 1px solid #d7e4f7;
+    border-radius: 14px;
+    background: var(--cine-surface);
+    box-shadow: 0 10px 25px rgba(45, 93, 161, 0.08);
+    padding: 12px;
+    min-height: 182px;
+  }
+
+  .cine-rated-poster {
+    width: 112px;
+    height: 156px;
+    border-radius: 10px;
+    border: 1px solid #d7e4f7;
+    overflow: hidden;
+    background: #eaf2ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8aa3c8;
+    text-decoration: none;
+  }
+
+  .cine-rated-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cine-rated-info {
+    min-width: 0;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+
+  .cine-rated-header {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .cine-rated-title {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.25;
+  }
+
+  .cine-rated-meta {
+    margin: 4px 0 0;
+    color: var(--cine-muted);
+    font-size: 0.95rem;
+  }
+
+  .cine-rated-more {
+    border: none;
+    background: transparent;
+    color: #5f7697;
+    text-decoration: none;
+    padding: 4px;
+  }
+
+  .cine-rated-comment {
+    margin: 0;
+    color: #314c72;
+    font-size: 0.95rem;
+  }
+
+  .cine-note-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    border: 1px solid #c6d9f6;
+    background: #eef5ff;
+    color: #2f5f9f;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 4px 8px;
+  }
+
   .cine-card {
     border: 1px solid #d7e4f7;
     border-radius: 14px;
@@ -456,6 +549,10 @@
     .cine-user-menu {
       justify-self: stretch;
     }
+
+    .cine-rated-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 {% endblock %}
@@ -474,7 +571,7 @@
     <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link {% if modo == 'recomendacoes' %}active{% endif %}">
       <i class="fas fa-lightbulb"></i> Recomenda&ccedil;&otilde;es
     </a>
-    <a href="{% url 'dashboard' %}" class="cine-nav-link">
+    <a href="{% url 'home' %}?modo=avaliados" class="cine-nav-link {% if modo == 'avaliados' %}active{% endif %}">
       <i class="fas fa-star"></i> Avaliados
     </a>
     <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link {% if modo == 'favoritos' %}active{% endif %}">
@@ -508,7 +605,7 @@
         </span>
         <span class="cine-user-text">
           <strong>{{ user.nome|default:user.username }}</strong>
-          <small>{{ user.email|default:"email nao informado" }}</small>
+          <small>{{ user.email|default:"e-mail n&atilde;o informado" }}</small>
         </span>
         <i class="fas fa-caret-down cine-user-caret" aria-hidden="true"></i>
       </button>
@@ -526,20 +623,68 @@
   <section class="cine-panel">
     <h1>{{ titulo_home }}</h1>
 
-    <div class="cine-subtabs">
-      <a href="{% url 'home' %}" class="cine-subtab {% if modo == 'meus-filmes' %}active{% endif %}">Meus Filmes</a>
-      <a href="{% url 'home' %}?modo=recomendacoes" class="cine-subtab {% if modo == 'recomendacoes' %}active{% endif %}">Recomenda&ccedil;&otilde;es</a>
-      <a href="{% url 'dashboard' %}" class="cine-subtab">Avaliados</a>
-      <a href="{% url 'home' %}?modo=favoritos" class="cine-subtab {% if modo == 'favoritos' %}active{% endif %}">Favoritos</a>
-    </div>
+    {% if modo == 'avaliados' %}
+    <div class="cine-rated-grid">
+      {% for filme in filmes %}
+      <article class="cine-rated-card">
+        <a href="{% url 'filme_detalhe' id=filme.id %}" class="cine-rated-poster" aria-label="Ver detalhes de {{ filme.titulo }}">
+          {% if filme.poster %}
+            <img src="{{ filme.poster.url }}" alt="Poster de {{ filme.titulo }}">
+          {% else %}
+            <i class="fas fa-film"></i>
+          {% endif %}
+        </a>
 
+        <div class="cine-rated-info">
+          <div class="cine-rated-header">
+            <div>
+              <h3 class="cine-rated-title">{{ filme.titulo }}</h3>
+              <p class="cine-rated-meta">
+                {% if filme.ano_lancamento %}{{ filme.ano_lancamento }} &bull; {% endif %}
+                {{ filme.genero|default:"G&ecirc;nero indefinido" }}
+              </p>
+            </div>
+            <a href="{% url 'filme_detalhe' id=filme.id %}" class="cine-rated-more" aria-label="Abrir detalhes">
+              <i class="fas fa-ellipsis-v"></i>
+            </a>
+          </div>
+
+          <div class="cine-rating-row">
+            <span class="cine-stars" aria-hidden="true">
+              &#9733;&#9733;&#9733;&#9733;&#9733;
+              <span class="cine-stars-fill" style="width: {{ filme.minha_nota_percentual|floatformat:0 }}%;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            </span>
+            <span class="cine-rating-value">{% if filme.minha_nota %}{{ filme.minha_nota|floatformat:1 }}{% else %}-{% endif %}</span>
+          </div>
+
+          <p class="cine-card-line">
+            <strong>Minha nota:</strong>
+            {% if filme.minha_nota %}
+              <span class="cine-note-chip"><i class="fas fa-star"></i> {{ filme.minha_nota }}</span>
+            {% else %}
+              -
+            {% endif %}
+          </p>
+          <p class="cine-rated-comment">
+            <strong>Coment&aacute;rio:</strong> {{ filme.meu_comentario|default:"Sem coment&aacute;rio ainda."|truncatechars:95 }}
+          </p>
+        </div>
+      </article>
+      {% empty %}
+      <div class="cine-empty">
+        <p>Voc&ecirc; ainda n&atilde;o avaliou nenhum filme.</p>
+        <a href="{% url 'home' %}" class="cine-btn-primary">Ver meus filmes</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
     <div class="cine-grid">
       {% for filme in filmes %}
       <article class="cine-card">
         <div class="cine-card-body">
           <h3 class="cine-card-title">{{ filme.titulo }}</h3>
           <p class="cine-card-meta">
-            {{ filme.genero|default:"Gênero indefinido" }}
+            {{ filme.genero|default:"G&ecirc;nero indefinido" }}
             {% if filme.ano_lancamento %} &bull; {{ filme.ano_lancamento }}{% endif %}
           </p>
 
@@ -556,7 +701,7 @@
             {% if filme.minha_nota %}{{ filme.minha_nota }}{% else %}-{% endif %}
           </p>
           <p class="cine-card-line">
-            <strong>Comentário:</strong> {{ filme.meu_comentario|default:"Sem comentário ainda."|truncatechars:55 }}
+            <strong>Coment&aacute;rio:</strong> {{ filme.meu_comentario|default:"Sem coment&aacute;rio ainda."|truncatechars:55 }}
           </p>
         </div>
 
@@ -584,6 +729,7 @@
       </div>
       {% endfor %}
     </div>
+    {% endif %}
   </section>
 </div>
 {% endblock %}
