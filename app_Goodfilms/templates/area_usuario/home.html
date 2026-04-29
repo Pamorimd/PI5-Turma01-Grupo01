@@ -498,6 +498,42 @@
     color: var(--cine-muted);
   }
 
+  .cine-badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #4a84d7;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  .cine-ordenacao-container {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cine-ordenacao-label {
+    font-weight: 600;
+    color: #193357;
+  }
+
+  .cine-ordenacao-select {
+    border: 1px solid #cddcf3;
+    border-radius: 10px;
+    padding: 8px 12px;
+    background: white;
+    color: #193357;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
   @media (max-width: 992px) {
     .cine-sidebar {
       position: static;
@@ -647,6 +683,35 @@
       {% endfor %}
     </div>
     {% else %}
+    {% if modo == 'meus-filmes' %}
+    <!-- Filtros e Ordenação para Meus Filmes -->
+    <div class="cine-subtabs">
+      <a href="{% url 'home' %}{% if q %}?q={{ q }}{% endif %}" class="cine-subtab {% if status_filtro == 'todos' or not status_filtro %}active{% endif %}">
+        <i class="fas fa-check-circle"></i> Todos <span class="cine-badge-count">{{ assistidos_count|add:nao_assistidos_count }}</span>
+      </a>
+      <a href="{% url 'home' %}?status=assistidos{% if q %}&q={{ q }}{% endif %}" class="cine-subtab {% if status_filtro == 'assistidos' %}active{% endif %}">
+        <i class="fas fa-eye"></i> Assistidos <span class="cine-badge-count">{{ assistidos_count }}</span>
+      </a>
+      <a href="{% url 'home' %}?status=nao-assistidos{% if q %}&q={{ q }}{% endif %}" class="cine-subtab {% if status_filtro == 'nao-assistidos' %}active{% endif %}">
+        <i class="fas fa-eye-slash"></i> Não Assistidos <span class="cine-badge-count">{{ nao_assistidos_count }}</span>
+      </a>
+    </div>
+
+    <!-- Ordenação -->
+    <div class="cine-ordenacao-container">
+      <label for="ordenacao" class="cine-ordenacao-label">Ordenar por:</label>
+      <form method="get" action="{% url 'home' %}" id="ordem-form" style="display: flex; gap: 8px; align-items: center;">
+        <input type="hidden" name="status" value="{{ status_filtro }}">
+        {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+        <select name="ordem" id="ordenacao" onchange="document.getElementById('ordem-form').submit()" class="cine-ordenacao-select">
+          <option value="-data_cadastro" {% if ordenacao == '-data_cadastro' %}selected{% endif %}>Mais Recentes</option>
+          <option value="titulo" {% if ordenacao == 'titulo' %}selected{% endif %}>Título (A-Z)</option>
+          <option value="-media_nota" {% if ordenacao == '-media_nota' %}selected{% endif %}>Melhor Avaliados</option>
+        </select>
+      </form>
+    </div>
+    {% endif %}
+
     <div class="cine-grid">
       {% for filme in filmes %}
       <article class="cine-card">

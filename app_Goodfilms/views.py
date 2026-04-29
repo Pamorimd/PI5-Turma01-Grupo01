@@ -117,6 +117,8 @@ def amigos(request):
 def home_user(request):
     query = request.GET.get('q', '').strip()
     modo = request.GET.get('modo', 'meus-filmes').strip()
+    status_filtro = request.GET.get('status', 'todos').strip()  # 'todos', 'assistidos', 'nao-assistidos'
+    ordenacao = request.GET.get('ordem', '-data_cadastro').strip()  # '-data_cadastro', 'titulo', '-media_nota'
     favoritos_ids = _get_favoritos_ids(request.user)
 
     avaliacao_usuario = Filme_avaliacao.objects.filter(
@@ -146,6 +148,9 @@ def home_user(request):
     if query:
         filmes = filmes.filter(titulo__icontains=query)
 
+    assistidos_count = 0
+    nao_assistidos_count = 0
+
     if modo == 'recomendacoes':
         filmes = filmes.order_by('-media_nota', '-data_cadastro')
         titulo_home = 'Recomenda\u00e7\u00f5es'
@@ -162,8 +167,30 @@ def home_user(request):
         titulo_home = 'Favoritos'
     else:
         modo = 'meus-filmes'
-        filmes = filmes.order_by('-data_cadastro')
         titulo_home = 'Meus Filmes'
+        
+        # Separar por status de assistido/não assistido
+        assistidos_ids = set(
+            Filme_assistido.objects.filter(user=request.user).values_list('filme_id', flat=True)
+        )
+        
+        assistidos_count = len(assistidos_ids)
+        total_filmes = filmes.count()
+        nao_assistidos_count = total_filmes - assistidos_count
+        
+        # Filtrar por status
+        if status_filtro == 'assistidos':
+            filmes = filmes.filter(id__in=assistidos_ids)
+        elif status_filtro == 'nao-assistidos':
+            filmes = filmes.exclude(id__in=assistidos_ids)
+        
+        # Aplicar ordenação
+        if ordenacao == 'titulo':
+            filmes = filmes.order_by('titulo')
+        elif ordenacao == '-media_nota':
+            filmes = filmes.order_by('-media_nota', '-data_cadastro')
+        else:  # '-data_cadastro' é o padrão
+            filmes = filmes.order_by('-data_cadastro')
 
     sender_page = {
         'pagina': {
@@ -176,6 +203,10 @@ def home_user(request):
         'q': query,
         'modo': modo,
         'titulo_home': titulo_home,
+        'status_filtro': status_filtro,
+        'ordenacao': ordenacao,
+        'assistidos_count': assistidos_count,
+        'nao_assistidos_count': nao_assistidos_count,
     }
 
     return render(request, Area_usuario + 'home.html', sender_page)
