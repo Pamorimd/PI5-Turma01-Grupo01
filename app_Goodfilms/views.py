@@ -55,20 +55,9 @@ def _safe_next_url(request, fallback):
 # ----------------------------
 
 def index_view(request):
-    filmes = Filme.objects.all().order_by('-data_cadastro')
     favoritos_ids = _get_favoritos_ids(request.user)
-    
-    page_num = request.GET.get('page', 1)
-    paginator = Paginator(filmes, 6)
-    
-    try:
-        page_obj = paginator.page(page_num)
-    except (PageNotAnInteger, EmptyPage):
-        page_obj = paginator.page(1)
 
     context = {
-        'filmes': page_obj.object_list,
-        'page_obj': page_obj,
         'incluir_favoritos': favoritos_ids,
     }
 

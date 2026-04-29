@@ -142,67 +142,6 @@
     </div>
   </section>
 
-  <!-- Filmes em destaque -->
-  <section class="py-5">
-    <div class="container">
-      <h3 class="section-title text-center">Filmes em Destaque</h3>
-
-      <div class="row g-4">
-        {% for filme in filmes %}
-          <div class="col-md-4 col-lg-3">
-            <div class="card card-movie">
-              {% if filme.poster %}
-                <img src="{{ filme.poster.url }}" alt="{{ filme.titulo }}">
-              {% else %}
-                <img src="{% static 'img/default-movie.jpg' %}" alt="Poster padrão">
-              {% endif %}
-              <div class="card-body">
-                <h5 class="card-title">{{ filme.titulo }}</h5>
-                <p class="card-text text-muted mb-2">
-                  {{ filme.genero|default:"Gênero não informado" }}
-                </p>
-                <p class="movie-rating mb-2">
-                  ⭐ {{ filme.nota|default:"Sem nota" }}
-                </p>
-                <a href="#" class="btn btn-outline-dark btn-sm">Ver detalhes</a>
-              </div>
-            </div>
-          </div>
-        {% empty %}
-          <div class="col-12 text-center">
-            <p>Nenhum filme cadastrado no momento.</p>
-          </div>
-        {% endfor %}
-      </div>
-
-      {% if page_obj.paginator.num_pages > 1 %}
-      <nav class="cine-pagination" aria-label="Paginação de filmes" style="margin-top: 30px;">
-        <ul style="display: flex; gap: 8px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0; justify-content: center;">
-          {% if page_obj.has_previous %}
-          <li><a href="?page={{ page_obj.previous_page_number }}" style="min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: #f5f8ff; color: #42587c; font-weight: 700; text-decoration: none;">&laquo;</a></li>
-          {% else %}
-          <li style="min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: #f5f8ff; color: #42587c; font-weight: 700; opacity: 0.45; pointer-events: none;">&laquo;</li>
-          {% endif %}
-
-          {% for num in page_obj.paginator.page_range %}
-            {% if num == page_obj.number %}
-              <li style="min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: #4a84d7; color: white; font-weight: 700;">{{ num }}</li>
-            {% else %}
-              <li><a href="?page={{ num }}" style="min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: #f5f8ff; color: #42587c; font-weight: 700; text-decoration: none;">{{ num }}</a></li>
-            {% endif %}
-          {% endfor %}
-
-          {% if page_obj.has_next %}
-          <li><a href="?page={{ page_obj.next_page_number }}" style="min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: #f5f8ff; color: #42587c; font-weight: 700; text-decoration: none;">&raquo;</a></li>
-          {% else %}
-          <li style="min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: #f5f8ff; color: #42587c; font-weight: 700; opacity: 0.45; pointer-events: none;">&raquo;</li>
-          {% endif %}
-        </ul>
-      </nav>
-      {% endif %}
-    </div>
-  </section>
-
   <!-- Recursos da plataforma -->
   <section class="py-5">
     <div class="container">
