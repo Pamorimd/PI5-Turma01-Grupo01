@@ -216,6 +216,7 @@
     color: #2f5f9f;
     font-weight: 700;
     padding: 10px 14px;
+    text-decoration: none;
   }
 
   .cine-detail-panel {
@@ -228,7 +229,9 @@
 
   .cine-detail-header {
     display: grid;
-    gap: 14px;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 20px;
     margin-bottom: 22px;
   }
 
@@ -556,18 +559,21 @@
     </div>
   </header>
 
-  <a href="{% url 'home' %}" class="cine-voltar">
-    <i class="fas fa-arrow-left"></i>
-    Voltar
-  </a>
-
   <section class="cine-detail-panel">
     <header class="cine-detail-header">
       <div>
         <h1 class="cine-detail-title">{{ filme.titulo }}</h1>
       </div>
+      <a href="{% url 'home' %}" class="cine-voltar">
+        <i class="fas fa-arrow-left"></i>
+        Voltar
+      </a>
+    </header>
 
-      <div class="cine-chips">
+    <div style="display: grid; gap: 14px;">
+    </div>
+
+    <div class="cine-chips">
         <span class="cine-chip">{{ filme.ano_lancamento|default:"Ano n&atilde;o informado" }}</span>
         <span class="cine-chip">{{ duracao_label }}</span>
         <span class="cine-chip classificacao">{{ filme.classificacao|default:"Livre" }}</span>

@@ -498,6 +498,54 @@
     color: var(--cine-muted);
   }
 
+  .cine-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .cine-pagination ul {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .cine-pagination li {
+    min-width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #f5f8ff;
+    color: #42587c;
+    font-weight: 700;
+  }
+
+  .cine-pagination li a {
+    color: inherit;
+    text-decoration: none;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cine-pagination li.active {
+    background: #4a84d7;
+    color: white;
+  }
+
+  .cine-pagination li.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
   .cine-badge-count {
     display: inline-flex;
     align-items: center;
@@ -758,11 +806,40 @@
       </article>
       {% empty %}
       <div class="cine-empty">
-        <p>Nenhum filme encontrado. Tente outro termo ou adicione um novo filme.</p>
-        <a href="{% url 'cadastro_de_filme' %}" class="cine-btn-primary">Adicionar filme</a>
+        {% if modo == 'favoritos' %}
+          <p>Você ainda não adicionou nenhum filme aos favoritos.</p>
+        {% else %}
+          <p>Nenhum filme encontrado. Tente outro termo ou altere os filtros.</p>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
+    {% endif %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="cine-pagination" aria-label="Paginação de filmes">
+      <ul>
+        {% if page_obj.has_previous %}
+        <li><a href="?modo={{ modo }}{% if q %}&q={{ q }}{% endif %}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if ordenacao %}&ordem={{ ordenacao }}{% endif %}&page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+        {% else %}
+        <li class="disabled">&laquo;</li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if num == page_obj.number %}
+            <li class="active">{{ num }}</li>
+          {% else %}
+            <li><a href="?modo={{ modo }}{% if q %}&q={{ q }}{% endif %}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if ordenacao %}&ordem={{ ordenacao }}{% endif %}&page={{ num }}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li><a href="?modo={{ modo }}{% if q %}&q={{ q }}{% endif %}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if ordenacao %}&ordem={{ ordenacao }}{% endif %}&page={{ page_obj.next_page_number }}">&raquo;</a></li>
+        {% else %}
+        <li class="disabled">&raquo;</li>
+        {% endif %}
+      </ul>
+    </nav>
     {% endif %}
   </section>
 </div>

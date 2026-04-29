@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .forms import FilmeForm
 from .models import Filme, Filme_assistido, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
@@ -56,9 +57,18 @@ def _safe_next_url(request, fallback):
 def index_view(request):
     filmes = Filme.objects.all().order_by('-data_cadastro')
     favoritos_ids = _get_favoritos_ids(request.user)
+    
+    page_num = request.GET.get('page', 1)
+    paginator = Paginator(filmes, 6)
+    
+    try:
+        page_obj = paginator.page(page_num)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
 
     context = {
-        'filmes': filmes,
+        'filmes': page_obj.object_list,
+        'page_obj': page_obj,
         'incluir_favoritos': favoritos_ids,
     }
 
@@ -192,13 +202,22 @@ def home_user(request):
         else:  # '-data_cadastro' é o padrão
             filmes = filmes.order_by('-data_cadastro')
 
+    page_num = request.GET.get('page', 1)
+    paginator = Paginator(filmes, 6)
+
+    try:
+        page_obj = paginator.page(page_num)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
+
     sender_page = {
         'pagina': {
             'name': titulo_home,
             'code': 'home',
             'intro': False,
         },
-        'filmes': filmes,
+        'filmes': page_obj.object_list,
+        'page_obj': page_obj,
         'incluir_favoritos': favoritos_ids,
         'q': query,
         'modo': modo,
@@ -221,6 +240,14 @@ def meus_filmes(request):
 
     if query:
         filmes_qs = filmes_qs.filter(titulo__icontains=query)
+    
+    page_num = request.GET.get('page', 1)
+    paginator = Paginator(filmes_qs, 6)
+    
+    try:
+        page_obj = paginator.page(page_num)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
 
     return render(request, Area_usuario + 'meus_filmes.html', {
         'pagina': {
@@ -231,7 +258,8 @@ def meus_filmes(request):
             'text': 'Editar filme',
             'url': 'editar_filme'
         },
-        'filmes_meus': filmes_qs,
+        'filmes_meus': page_obj.object_list,
+        'page_obj': page_obj,
         'incluir_favoritos': _get_favoritos_ids(request.user),
         'q': query
     })
