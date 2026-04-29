@@ -248,7 +248,7 @@ def filme_detalhe(request, id):
             else:
                 Filme_assistido.objects.filter(user=request.user, filme=filme).delete()
 
-        return redirect('filme_detalhe', id=filme.id)
+        return redirect('home')
 
     Filme_visualizacao.objects.create(
         user=request.user,
