@@ -52,6 +52,13 @@ class Filme(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='filmes',
+        null=True,
+        blank=True,
+    )
     titulo = models.CharField(max_length=255)
     titulo_original = models.CharField(max_length=255, blank=True, null=True)
     genero = models.CharField(max_length=255, help_text="Ex: Drama, Sci-Fi") 

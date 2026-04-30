@@ -25,9 +25,8 @@ def _get_favoritos_ids(user):
     if not user.is_authenticated:
         return []
 
-    # Ajuste "filme_id" se no seu model o FK tiver outro nome
     return list(
-        Filme_favoritos.objects.filter(user=user).values_list('filme_id', flat=True)
+        Filme_favoritos.objects.filter(user=user, filme__user=user).values_list('filme_id', flat=True)
     )
 
 
@@ -122,7 +121,7 @@ def home_user(request):
     ordenacao = request.GET.get('ordem', '-data_cadastro').strip()  # '-data_cadastro', 'titulo', '-media_nota'
     favoritos_ids = _get_favoritos_ids(request.user)
     assistidos_ids = set(
-        Filme_assistido.objects.filter(user=request.user).values_list('filme_id', flat=True)
+        Filme_assistido.objects.filter(user=request.user, filme__user=request.user).values_list('filme_id', flat=True)
     )
 
     avaliacao_usuario = Filme_avaliacao.objects.filter(
@@ -131,7 +130,7 @@ def home_user(request):
     )
 
     filmes = (
-        Filme.objects.all()
+        Filme.objects.filter(user=request.user)
         .annotate(
             media_nota=Coalesce(Avg('avaliacoes__nota'), Value(0.0)),
             minha_nota=Subquery(avaliacao_usuario.values('nota')[:1], output_field=IntegerField()),
@@ -223,7 +222,7 @@ def meus_filmes(request):
     user = request.user
     query = request.GET.get('q', '')
 
-    filmes_qs = Filme.objects.filter(user=user).order_by('-data_criacao')
+    filmes_qs = Filme.objects.filter(user=user).order_by('-data_cadastro')
 
     if query:
         filmes_qs = filmes_qs.filter(titulo__icontains=query)
@@ -268,7 +267,7 @@ def configuracoes(request):
 
 @login_required(login_url='login')
 def filme_detalhe(request, id):
-    filme = get_object_or_404(Filme, id=id)
+    filme = get_object_or_404(Filme, id=id, user=request.user)
 
     if request.method == 'POST':
         acao = request.POST.get('acao')
@@ -294,7 +293,7 @@ def filme_detalhe(request, id):
             else:
                 Filme_assistido.objects.filter(user=request.user, filme=filme).delete()
 
-        return redirect('home')
+        return redirect('filme_detalhe', id=filme.id)
 
     Filme_visualizacao.objects.create(
         user=request.user,
@@ -335,7 +334,9 @@ def cadastro_de_filme(request):
     if request.method == 'POST':
         form = FilmeForm(request.POST)
         if form.is_valid():
-            form.save()
+            filme = form.save(commit=False)
+            filme.user = request.user
+            filme.save()
             return redirect('home')
     else:
         form = FilmeForm()
@@ -351,13 +352,15 @@ def cadastro_de_filme(request):
 
 @login_required(login_url='login')
 def editar_filme(request, id):
-    filme = get_object_or_404(Filme, id=id)
+    filme = get_object_or_404(Filme, id=id, user=request.user)
 
     if request.method == 'POST':
         form = FilmeForm(request.POST, instance=filme)
         if form.is_valid():
-            form.save()
-            return redirect('home')
+            filme = form.save(commit=False)
+            filme.user = request.user
+            filme.save()
+            return redirect('filme_detalhe', id=filme.id)
     else:
         form = FilmeForm(instance=filme)
 
@@ -530,13 +533,13 @@ def favoritar(request):
         adicionar = dados[1] == 'True'
 
         if adicionar:
-            filme = get_object_or_404(Filme, id=filme_id)
+            filme = get_object_or_404(Filme, id=filme_id, user=user)
             Filme_favoritos.objects.get_or_create(user=user, filme=filme)
             if request.POST.get('next'):
                 return redirect(next_url)
             return redirect(f"{reverse('home')}?modo=favoritos")
         else:
-            Filme_favoritos.objects.filter(user=user, filme__id=filme_id).delete()
+            Filme_favoritos.objects.filter(user=user, filme__id=filme_id, filme__user=user).delete()
 
         return redirect(next_url)
 
