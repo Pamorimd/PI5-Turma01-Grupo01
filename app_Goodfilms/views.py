@@ -121,6 +121,9 @@ def home_user(request):
     status_filtro = request.GET.get('status', 'todos').strip()  # 'todos', 'assistidos', 'nao-assistidos'
     ordenacao = request.GET.get('ordem', '-data_cadastro').strip()  # '-data_cadastro', 'titulo', '-media_nota'
     favoritos_ids = _get_favoritos_ids(request.user)
+    assistidos_ids = set(
+        Filme_assistido.objects.filter(user=request.user).values_list('filme_id', flat=True)
+    )
 
     avaliacao_usuario = Filme_avaliacao.objects.filter(
         user=request.user,
@@ -149,8 +152,8 @@ def home_user(request):
     if query:
         filmes = filmes.filter(titulo__icontains=query)
 
-    assistidos_count = 0
-    nao_assistidos_count = 0
+    assistidos_count = len(assistidos_ids)
+    nao_assistidos_count = max(filmes.count() - assistidos_count, 0)
 
     if modo == 'recomendacoes':
         filmes = filmes.order_by('-media_nota', '-data_cadastro')
@@ -171,14 +174,6 @@ def home_user(request):
         titulo_home = 'Meus Filmes'
         
         # Separar por status de assistido/não assistido
-        assistidos_ids = set(
-            Filme_assistido.objects.filter(user=request.user).values_list('filme_id', flat=True)
-        )
-        
-        assistidos_count = len(assistidos_ids)
-        total_filmes = filmes.count()
-        nao_assistidos_count = total_filmes - assistidos_count
-        
         # Filtrar por status
         if status_filtro == 'assistidos':
             filmes = filmes.filter(id__in=assistidos_ids)
@@ -210,6 +205,7 @@ def home_user(request):
         'filmes': page_obj.object_list,
         'page_obj': page_obj,
         'incluir_favoritos': favoritos_ids,
+        'assistidos_ids': assistidos_ids,
         'q': query,
         'modo': modo,
         'titulo_home': titulo_home,
