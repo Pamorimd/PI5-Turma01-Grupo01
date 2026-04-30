@@ -150,16 +150,26 @@
     box-shadow: 0 18px 34px rgba(0, 20, 72, 0.28);
   }
 
-  .cine-sidebar-profile {
+  .cine-sidebar-profile-details {
     margin-top: 24px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 18px;
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.16);
     color: rgba(255, 255, 255, 0.92);
+  }
+
+  .cine-sidebar-profile-details summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+  }
+
+  .cine-sidebar-profile-details summary::-webkit-details-marker,
+  .cine-sidebar-profile-details summary::marker {
+    display: none;
   }
 
   .cine-sidebar-profile-avatar {
@@ -201,6 +211,34 @@
     margin-left: auto;
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.95rem;
+    transition: transform 0.2s ease;
+  }
+
+  .cine-sidebar-profile-details[open] .cine-sidebar-profile-caret {
+    transform: rotate(180deg);
+  }
+
+  .cine-sidebar-profile-menu {
+    padding: 0 18px 16px;
+  }
+
+  .cine-sidebar-profile-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-weight: 700;
+  }
+
+  .cine-sidebar-profile-action:hover,
+  .cine-sidebar-profile-action:focus {
+    background: rgba(255, 255, 255, 0.14);
   }
 
   .cine-home-shell {
@@ -764,16 +802,24 @@
     </a>
   </div>
 
-  <div class="cine-sidebar-profile">
-    <span class="cine-sidebar-profile-avatar" aria-hidden="true">
-      <i class="fas fa-user"></i>
-    </span>
-    <span class="cine-sidebar-profile-text">
-      <strong>{{ user.nome|default:user.username }}</strong>
-      <small>{{ user.email|default:"email nao informado" }}</small>
-    </span>
-    <i class="fas fa-chevron-down cine-sidebar-profile-caret" aria-hidden="true"></i>
-  </div>
+  <details class="cine-sidebar-profile-details">
+    <summary>
+      <span class="cine-sidebar-profile-avatar" aria-hidden="true">
+        <i class="fas fa-user"></i>
+      </span>
+      <span class="cine-sidebar-profile-text">
+        <strong>{{ user.nome|default:user.username }}</strong>
+        <small>{{ user.email|default:"email nao informado" }}</small>
+      </span>
+      <i class="fas fa-chevron-down cine-sidebar-profile-caret" aria-hidden="true"></i>
+    </summary>
+    <div class="cine-sidebar-profile-menu">
+      <a href="{% url 'logout' %}" class="cine-sidebar-profile-action">
+        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+        <span>Sair</span>
+      </a>
+    </div>
+  </details>
 </aside>
 {% endblock %}
 
