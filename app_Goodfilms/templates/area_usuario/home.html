@@ -49,11 +49,19 @@
     width: 280px;
     min-height: 100vh;
     padding: 44px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     background:
       linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px),
       linear-gradient(180deg, var(--gf-blue-950) 0%, var(--gf-blue-900) 46%, #06256b 100%);
     background-size: 30px 30px, auto;
     box-shadow: 14px 0 36px rgba(5, 30, 86, 0.18);
+  }
+
+  .cine-sidebar-main {
+    display: grid;
+    gap: 18px;
   }
 
   .cine-brand {
@@ -142,6 +150,59 @@
     box-shadow: 0 18px 34px rgba(0, 20, 72, 0.28);
   }
 
+  .cine-sidebar-profile {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .cine-sidebar-profile-avatar {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    font-size: 1rem;
+  }
+
+  .cine-sidebar-profile-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .cine-sidebar-profile-text strong {
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cine-sidebar-profile-text small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.92rem;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cine-sidebar-profile-caret {
+    margin-left: auto;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+  }
+
   .cine-home-shell {
     display: grid;
     gap: 26px;
@@ -149,29 +210,30 @@
 
   .cine-topbar {
     display: grid;
-    grid-template-columns: minmax(320px, 720px) minmax(230px, 300px);
+    grid-template-columns: 1fr;
     align-items: center;
-    justify-content: space-between;
+    justify-content: stretch;
     gap: 24px;
   }
 
   .cine-search-form {
+    width: 100%;
     position: relative;
-    min-height: 58px;
+    min-height: 62px;
   }
 
   .cine-search-form input {
     width: 100%;
-    height: 58px;
+    height: 62px;
     border: 1px solid var(--gf-border);
-    border-radius: 8px;
+    border-radius: 24px;
     outline: none;
-    background: rgba(255, 255, 255, 0.86);
+    background: rgba(255, 255, 255, 0.95);
     color: var(--gf-text);
-    padding: 0 58px 0 34px;
-    font-size: 1.05rem;
+    padding: 0 54px 0 28px;
+    font-size: 1.06rem;
     font-weight: 600;
-    box-shadow: 0 12px 28px rgba(20, 50, 98, 0.06);
+    box-shadow: 0 20px 40px rgba(20, 50, 98, 0.08);
   }
 
   .cine-search-form input::placeholder {
@@ -182,17 +244,18 @@
   .cine-search-form button {
     position: absolute;
     top: 50%;
-    right: 12px;
+    right: 16px;
     display: grid;
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     place-items: center;
     border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--gf-blue-950);
-    font-size: 1.28rem;
+    border-radius: 14px;
+    background: var(--gf-blue-700);
+    color: #ffffff;
+    font-size: 1.18rem;
     transform: translateY(-50%);
+    box-shadow: 0 10px 24px rgba(16, 88, 192, 0.22);
   }
 
   .cine-user-menu {
@@ -668,36 +731,49 @@
 
 {% block sidebar %}
 <aside class="cine-sidebar">
-  <a href="{% url 'home' %}" class="cine-brand" aria-label="GoodFilms">
-    <i class="fas fa-clapperboard" aria-hidden="true"></i>
-    <span>Good<span>Films</span></span>
-  </a>
+  <div class="cine-sidebar-main">
+    <a href="{% url 'home' %}" class="cine-brand" aria-label="GoodFilms">
+      <i class="fas fa-clapperboard" aria-hidden="true"></i>
+      <span>Good<span>Films</span></span>
+    </a>
 
-  <nav class="cine-nav" aria-label="Menu principal">
-    <a href="{% url 'home' %}" class="cine-nav-link {% if modo == 'meus-filmes' %}active{% endif %}">
-      <i class="fas fa-film" aria-hidden="true"></i>
-      <span>Meus Filmes</span>
-    </a>
-    <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link {% if modo == 'recomendacoes' %}active{% endif %}">
-      <i class="far fa-lightbulb" aria-hidden="true"></i>
-      <span>Recomenda&ccedil;&otilde;es</span>
-    </a>
-    <a href="{% url 'home' %}?modo=avaliados" class="cine-nav-link {% if modo == 'avaliados' %}active{% endif %}">
-      <i class="fas fa-star" aria-hidden="true"></i>
-      <span>Avaliados</span>
-    </a>
-    <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link {% if modo == 'favoritos' %}active{% endif %}">
-      <i class="fas fa-heart" aria-hidden="true"></i>
-      <span>Favoritos</span>
-    </a>
-  </nav>
+    <nav class="cine-nav" aria-label="Menu principal">
+      <a href="{% url 'home' %}" class="cine-nav-link {% if modo == 'meus-filmes' %}active{% endif %}">
+        <i class="fas fa-film" aria-hidden="true"></i>
+        <span>Meus Filmes</span>
+      </a>
+      <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link {% if modo == 'recomendacoes' %}active{% endif %}">
+        <i class="far fa-lightbulb" aria-hidden="true"></i>
+        <span>Recomenda&ccedil;&otilde;es</span>
+      </a>
+      <a href="{% url 'home' %}?modo=avaliados" class="cine-nav-link {% if modo == 'avaliados' %}active{% endif %}">
+        <i class="fas fa-star" aria-hidden="true"></i>
+        <span>Avaliados</span>
+      </a>
+      <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link {% if modo == 'favoritos' %}active{% endif %}">
+        <i class="fas fa-heart" aria-hidden="true"></i>
+        <span>Favoritos</span>
+      </a>
+    </nav>
 
-  <div class="cine-sidebar-divider" aria-hidden="true"></div>
+    <div class="cine-sidebar-divider" aria-hidden="true"></div>
 
-  <a href="{% url 'cadastro_de_filme' %}" class="cine-add-btn">
-    <i class="fas fa-plus" aria-hidden="true"></i>
-    <span>Adicionar filme</span>
-  </a>
+    <a href="{% url 'cadastro_de_filme' %}" class="cine-add-btn">
+      <i class="fas fa-plus" aria-hidden="true"></i>
+      <span>Adicionar filme</span>
+    </a>
+  </div>
+
+  <div class="cine-sidebar-profile">
+    <span class="cine-sidebar-profile-avatar" aria-hidden="true">
+      <i class="fas fa-user"></i>
+    </span>
+    <span class="cine-sidebar-profile-text">
+      <strong>{{ user.nome|default:user.username }}</strong>
+      <small>{{ user.email|default:"email nao informado" }}</small>
+    </span>
+    <i class="fas fa-chevron-down cine-sidebar-profile-caret" aria-hidden="true"></i>
+  </div>
 </aside>
 {% endblock %}
 
@@ -719,40 +795,6 @@
         <i class="fas fa-search" aria-hidden="true"></i>
       </button>
     </form>
-
-    <div class="cine-user-menu dropdown">
-      <button class="cine-user-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="cine-user-avatar" aria-hidden="true">
-          <i class="fas fa-user"></i>
-        </span>
-        <span class="cine-user-text">
-          <strong>{{ user.nome|default:user.username }}</strong>
-          <small>{{ user.email|default:"email nao informado" }}</small>
-        </span>
-        <i class="fas fa-chevron-down cine-user-caret" aria-hidden="true"></i>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end cine-user-dropdown">
-        <li>
-          <a class="dropdown-item" href="{% url 'perfil' %}">
-            <i class="fas fa-user-circle text-primary"></i>
-            Perfil
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item" href="{% url 'configuracoes' %}">
-            <i class="fas fa-cog text-secondary"></i>
-            Configura&ccedil;&otilde;es
-          </a>
-        </li>
-        <li><hr class="dropdown-divider"></li>
-        <li>
-          <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-            <i class="fas fa-sign-out-alt"></i>
-            Sair
-          </a>
-        </li>
-      </ul>
-    </div>
   </header>
 
   <section class="cine-panel">
