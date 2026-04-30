@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Avg, Count, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
@@ -377,6 +379,8 @@ def editar_filme(request, id):
 # Login, perfil, configurações
 # ----------------------------
 
+@never_cache
+@ensure_csrf_cookie
 def cadastro(request):
     if request.method == 'POST':
         nome = (request.POST.get('nome') or '').strip()
@@ -415,6 +419,8 @@ def cadastro(request):
     return render(request, Area_login + 'register.html')
 
 
+@never_cache
+@ensure_csrf_cookie
 def login_view(request):
     if request.method == 'POST':
         username = (
@@ -454,7 +460,7 @@ def login_view(request):
             else:
                 request.session.set_expiry(60 * 60 * 24 * 1)
 
-            return redirect('/home')
+            return redirect(_safe_next_url(request, reverse('home')))
 
         return render(request, Area_login + 'login.html', {
             'form_err': 'Usuário ou senha inválidos.'

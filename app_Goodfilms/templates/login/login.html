@@ -561,6 +561,9 @@
 
         <form method="post" action="{% url 'login' %}">
           {% csrf_token %}
+          {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+          {% endif %}
 
           <div class="auth-field">
             <label for="login-email">Email</label>
