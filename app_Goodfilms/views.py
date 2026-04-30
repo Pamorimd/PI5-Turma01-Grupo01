@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .forms import FilmeForm
-from .models import Filme, Filme_assistido, Filme_favoritos, Filme_avaliacao, Filme_visualizacao
+from .models import Filme, Filme_assistido, Filme_favoritos, Filme_avaliacao
 
 CustomUser = get_user_model()
 
@@ -81,7 +81,6 @@ def base_Usuario_view(request):
 def dashboard(request):
     user = request.user
 
-    visualizacoes = Filme_visualizacao.objects.filter(user=user).count()
     total_favoritos = Filme_favoritos.objects.filter(user=user).count()
     total_avaliacoes = Filme_avaliacao.objects.filter(user=user).count()
 
@@ -90,7 +89,6 @@ def dashboard(request):
             'name': 'Painel de Controle',
             'code': 'dashboard'
         },
-        'visualizacoes': visualizacoes,
         'total_favoritos': total_favoritos,
         'total_avaliacoes': total_avaliacoes,
     })
@@ -295,11 +293,6 @@ def filme_detalhe(request, id):
                 Filme_assistido.objects.filter(user=request.user, filme=filme).delete()
 
         return redirect('filme_detalhe', id=filme.id)
-
-    Filme_visualizacao.objects.create(
-        user=request.user,
-        filme=filme,
-    )
 
     avaliacao_usuario = Filme_avaliacao.objects.filter(
         user=request.user,
