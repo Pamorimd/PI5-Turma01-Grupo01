@@ -515,6 +515,13 @@
     color: var(--gf-star);
   }
 
+  .cine-icon-btn.danger:hover,
+  .cine-icon-btn.danger:focus {
+    color: #dc3545;
+    background: #fff1f3;
+    border-color: #f3bac1;
+  }
+
   .cine-empty {
     grid-column: 1 / -1;
     min-height: 180px;
@@ -843,9 +850,13 @@
                 <i class="{% if filme.minha_nota %}fas{% else %}far{% endif %} fa-star" aria-hidden="true"></i>
               </a>
 
-              <a href="{% url 'filme_detalhe' id=filme.id %}" class="cine-icon-btn" aria-label="Ver detalhes">
-                <i class="fas fa-eye" aria-hidden="true"></i>
-              </a>
+              <form class="cine-icon-form" method="post" action="{% url 'excluir_filme' id=filme.id %}" onsubmit="return confirm('Deseja mesmo excluir este filme? Essa acao nao pode ser desfeita.');">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="cine-icon-btn danger" aria-label="Excluir filme">
+                  <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                </button>
+              </form>
             </div>
           </div>
         </article>

@@ -29,6 +29,7 @@ urlpatterns = [
     path('meus_filmes/', views.meus_filmes, name='meus_filmes'),
     path('filmes/<uuid:id>/', views.filme_detalhe, name='filme_detalhe'),
     path('filmes/editar/<uuid:id>/', views.editar_filme, name='editar_filme'),
+    path('filmes/excluir/<uuid:id>/', views.excluir_filme, name='excluir_filme'),
 
     # FunÃ§Ãµes do front para o back
     path('executar/', views.favoritar, name='favoritar'),

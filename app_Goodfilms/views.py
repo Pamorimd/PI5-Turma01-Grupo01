@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
 from django.db.models import Avg, Count, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
@@ -544,3 +545,13 @@ def favoritar(request):
         return redirect(next_url)
 
     return render(request, '404.html', status=404)
+
+
+@login_required
+@require_POST
+def excluir_filme(request, id):
+    filme = get_object_or_404(Filme, id=id, user=request.user)
+    fallback_url = request.META.get('HTTP_REFERER', reverse('home'))
+    next_url = _safe_next_url(request, fallback_url)
+    filme.delete()
+    return redirect(next_url)
