@@ -5,17 +5,21 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 from django.db.models import Avg, Count, ExpressionWrapper, F, FloatField, IntegerField, OuterRef, Subquery, TextField, Value
+from django.db.models import Case, When
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .forms import FilmeForm
 from .models import Filme, Filme_assistido, Filme_favoritos, Filme_avaliacao
+import requests
 
 CustomUser = get_user_model()
 
 Area_usuario = 'area_usuario/'
 Area_login = 'login/'
+
+API_BASE_URL = "http://localhost:3000"
 
 
 # ----------------------------
@@ -27,7 +31,7 @@ def _get_favoritos_ids(user):
         return []
 
     return list(
-        Filme_favoritos.objects.filter(user=user, filme__user=user).values_list('filme_id', flat=True)
+        Filme_favoritos.objects.filter(user=user).values_list('filme_id', flat=True)
     )
 
 
@@ -116,34 +120,23 @@ def amigos(request):
 def home_user(request):
     query = request.GET.get('q', '').strip()
     modo = request.GET.get('modo', 'meus-filmes').strip()
-    status_filtro = request.GET.get('status', 'todos').strip()  # 'todos', 'assistidos', 'nao-assistidos'
-    ordenacao = request.GET.get('ordem', '-data_cadastro').strip()  # '-data_cadastro', 'titulo', '-media_nota'
+    status_filtro = request.GET.get('status', 'todos').strip()
+    ordenacao = request.GET.get('ordem', '-data_cadastro').strip()
     favoritos_ids = _get_favoritos_ids(request.user)
-    assistidos_ids = set(
-        Filme_assistido.objects.filter(user=request.user, filme__user=request.user).values_list('filme_id', flat=True)
-    )
+    assistidos_ids = set(Filme_assistido.objects.filter(user=request.user).values_list('filme_id', flat=True))
 
-    avaliacao_usuario = Filme_avaliacao.objects.filter(
-        user=request.user,
-        filme=OuterRef('pk')
-    )
+    avaliacao_usuario = Filme_avaliacao.objects.filter(user=request.user, filme=OuterRef('pk'))
 
     filmes = (
-        Filme.objects.filter(user=request.user)
+        Filme.objects.all()
         .annotate(
             media_nota=Coalesce(Avg('avaliacoes__nota'), Value(0.0)),
             minha_nota=Subquery(avaliacao_usuario.values('nota')[:1], output_field=IntegerField()),
             meu_comentario=Subquery(avaliacao_usuario.values('comentario')[:1], output_field=TextField()),
         )
         .annotate(
-            media_percentual=ExpressionWrapper(
-                F('media_nota') * Value(20.0),
-                output_field=FloatField(),
-            ),
-            minha_nota_percentual=ExpressionWrapper(
-                Coalesce(F('minha_nota'), Value(0)) * Value(20.0),
-                output_field=FloatField(),
-            ),
+            media_percentual=ExpressionWrapper(F('media_nota') * Value(20.0), output_field=FloatField()),
+            minha_nota_percentual=ExpressionWrapper(Coalesce(F('minha_nota'), Value(0)) * Value(20.0), output_field=FloatField()),
         )
     )
 
@@ -154,15 +147,43 @@ def home_user(request):
     nao_assistidos_count = max(filmes.count() - assistidos_count, 0)
 
     if modo == 'recomendacoes':
-        filmes = filmes.order_by('-media_nota', '-data_cadastro')
-        titulo_home = 'Recomenda\u00e7\u00f5es'
+        titulo_home = 'Recomendações'
+        ids_recomendados = []
+
+        try:
+            ultimo_filme = Filme_avaliacao.objects.filter(user=request.user).order_by('-data_criacao').first()
+            target_id = str(ultimo_filme.filme.id) if ultimo_filme else "0"
+            
+            print(f"DEBUG: Chamando API com ID: {target_id}")
+            response = requests.get(f"{API_BASE_URL}/recommend/{target_id}", timeout=5)
+            
+            # --- DEBUG BRUTO ---
+            print(f"DEBUG: Status Code da API: {response.status_code}")
+            print(f"DEBUG: Resposta completa da API: {response.text}") 
+            # -------------------
+
+            if response.status_code == 200:
+                dados_api = response.json()
+                
+                # Vamos tentar pegar a chave, mas se não existir, vamos imprimir o que existe
+                lista_recs = dados_api.get("recomendacoes") or dados_api.get("recommendations") or []
+                print(f"DEBUG: Lista extraída: {lista_recs}")
+                
+                ids_recomendados = [str(item['movie_id']) for item in lista_recs if 'movie_id' in item]
+                print(f"DEBUG: IDs finais para o Django: {ids_recomendados}")
+
+        except Exception as e:
+            print(f"DEBUG: Erro na chamada da API: {e}")
+            ids_recomendados = []
+
+        if ids_recomendados:
+            preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids_recomendados)])
+            filmes = filmes.filter(id__in=ids_recomendados).order_by(preserved_order)
+        else:
+            filmes = Filme.objects.none()
+
     elif modo == 'avaliados':
-        filmes = (
-            filmes
-            .filter(avaliacoes__user=request.user)
-            .order_by('-avaliacoes__data_criacao', '-data_cadastro')
-            .distinct()
-        )
+        filmes = filmes.filter(avaliacoes__user=request.user).order_by('-avaliacoes__data_criacao', '-data_cadastro').distinct()
         titulo_home = 'Avaliados'
     elif modo == 'favoritos':
         filmes = filmes.filter(id__in=favoritos_ids).order_by('-data_cadastro')
@@ -170,20 +191,16 @@ def home_user(request):
     else:
         modo = 'meus-filmes'
         titulo_home = 'Meus Filmes'
-        
-        # Separar por status de assistido/não assistido
-        # Filtrar por status
         if status_filtro == 'assistidos':
             filmes = filmes.filter(id__in=assistidos_ids)
         elif status_filtro == 'nao-assistidos':
             filmes = filmes.exclude(id__in=assistidos_ids)
         
-        # Aplicar ordenação
         if ordenacao == 'titulo':
             filmes = filmes.order_by('titulo')
         elif ordenacao == '-media_nota':
             filmes = filmes.order_by('-media_nota', '-data_cadastro')
-        else:  # '-data_cadastro' é o padrão
+        else:
             filmes = filmes.order_by('-data_cadastro')
 
     page_num = request.GET.get('page', 1)
@@ -194,12 +211,8 @@ def home_user(request):
     except (PageNotAnInteger, EmptyPage):
         page_obj = paginator.page(1)
 
-    sender_page = {
-        'pagina': {
-            'name': titulo_home,
-            'code': 'home',
-            'intro': False,
-        },
+    return render(request, Area_usuario + 'home.html', {
+        'pagina': {'name': titulo_home, 'code': 'home', 'intro': False},
         'filmes': page_obj.object_list,
         'page_obj': page_obj,
         'incluir_favoritos': favoritos_ids,
@@ -211,9 +224,7 @@ def home_user(request):
         'ordenacao': ordenacao,
         'assistidos_count': assistidos_count,
         'nao_assistidos_count': nao_assistidos_count,
-    }
-
-    return render(request, Area_usuario + 'home.html', sender_page)
+    })
 
 
 @login_required
@@ -266,11 +277,10 @@ def configuracoes(request):
 
 @login_required(login_url='login')
 def filme_detalhe(request, id):
-    filme = get_object_or_404(Filme, id=id, user=request.user)
+    filme = get_object_or_404(Filme, id=id)
 
     if request.method == 'POST':
         acao = request.POST.get('acao')
-
         if acao == 'avaliar':
             nota = request.POST.get('nota')
             comentario = (request.POST.get('comentario') or '').strip()
@@ -279,11 +289,13 @@ def filme_detalhe(request, id):
                 Filme_avaliacao.objects.update_or_create(
                     user=request.user,
                     filme=filme,
-                    defaults={
-                        'nota': int(nota),
-                        'comentario': comentario,
-                    },
+                    defaults={'nota': int(nota), 'comentario': comentario},
                 )
+                # Chama a API ao avaliar
+                try:
+                    requests.get(f"{API_BASE_URL}/recommend/{filme.id}", timeout=2)
+                except:
+                    pass
 
         elif acao == 'status':
             status = request.POST.get('status')
@@ -294,10 +306,7 @@ def filme_detalhe(request, id):
 
         return redirect('filme_detalhe', id=filme.id)
 
-    avaliacao_usuario = Filme_avaliacao.objects.filter(
-        user=request.user,
-        filme=filme,
-    ).first()
+    avaliacao_usuario = Filme_avaliacao.objects.filter(user=request.user, filme=filme).first()
     resumo_avaliacoes = filme.avaliacoes.aggregate(
         media=Coalesce(Avg('nota'), Value(0.0)),
         total=Count('id'),
@@ -306,11 +315,7 @@ def filme_detalhe(request, id):
     favoritos_ids = _get_favoritos_ids(request.user)
 
     return render(request, Area_usuario + 'filme_detalhe.html', {
-        'pagina': {
-            'name': filme.titulo,
-            'code': 'filme_detalhe',
-            'intro': False,
-        },
+        'pagina': {'name': filme.titulo, 'code': 'filme_detalhe', 'intro': False},
         'filme': filme,
         'incluir_favoritos': favoritos_ids,
         'is_favorito': filme.id in favoritos_ids,
@@ -513,6 +518,9 @@ def perfil(request):
 
 @login_required
 def favoritar(request):
+    # DEBUG: O que o Django está recebendo?
+    print(f"DEBUG: Método da requisição: {request.method}")
+    print(f"DEBUG: Conteúdo do POST: {request.POST}")
     if request.method == "POST" and "favoritar" in request.POST:
         user = request.user
         valor = request.POST.get('favoritar', '')
@@ -527,13 +535,13 @@ def favoritar(request):
         adicionar = dados[1] == 'True'
 
         if adicionar:
-            filme = get_object_or_404(Filme, id=filme_id, user=user)
+            filme = get_object_or_404(Filme, id=filme_id)
             Filme_favoritos.objects.get_or_create(user=user, filme=filme)
             if request.POST.get('next'):
                 return redirect(next_url)
             return redirect(f"{reverse('home')}?modo=favoritos")
         else:
-            Filme_favoritos.objects.filter(user=user, filme__id=filme_id, filme__user=user).delete()
+            Filme_favoritos.objects.filter(user=user, filme__id=filme_id).delete()
 
         return redirect(next_url)
 
