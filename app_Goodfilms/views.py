@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import FilmeForm
 from .models import Filme, Filme_assistido, Filme_favoritos, Filme_avaliacao
 import requests
+import uuid
 
 CustomUser = get_user_model()
 
@@ -150,36 +151,40 @@ def home_user(request):
         titulo_home = 'Recomendações'
         ids_recomendados = []
 
+        historico_ids = list(Filme_avaliacao.objects.filter(
+            user=request.user, nota__gte=4
+        ).values_list('filme_id', flat=True))
+
+        historico_ids_str = [str(uid).replace('-', '') for uid in historico_ids]
+
         try:
-            ultimo_filme = Filme_avaliacao.objects.filter(user=request.user).order_by('-data_criacao').first()
-            target_id = str(ultimo_filme.filme.id) if ultimo_filme else "0"
-            
-            print(f"DEBUG: Chamando API com ID: {target_id}")
-            response = requests.get(f"{API_BASE_URL}/recommend/{target_id}", timeout=5)
-            
-            # --- DEBUG BRUTO ---
-            print(f"DEBUG: Status Code da API: {response.status_code}")
-            print(f"DEBUG: Resposta completa da API: {response.text}") 
-            # -------------------
+            response = requests.post(
+                f"{API_BASE_URL}/recommend/personalized", 
+                json={"movie_ids": historico_ids_str}, 
+                timeout=5
+            )
 
             if response.status_code == 200:
                 dados_api = response.json()
-                
-                # Vamos tentar pegar a chave, mas se não existir, vamos imprimir o que existe
-                lista_recs = dados_api.get("recomendacoes") or dados_api.get("recommendations") or []
-                print(f"DEBUG: Lista extraída: {lista_recs}")
-                
-                ids_recomendados = [str(item['movie_id']) for item in lista_recs if 'movie_id' in item]
-                print(f"DEBUG: IDs finais para o Django: {ids_recomendados}")
-
+                lista_recs = dados_api.get("recomendacoes", [])
+                for item in lista_recs:
+                    if 'movie_id' in item:
+                        try:
+                            uid_valido = uuid.UUID(str(item['movie_id']))
+                            ids_recomendados.append(uid_valido)
+                        except ValueError:
+                            pass # Ignora se vier um lixo que não é UUID
+                print("IDS RECOMENDADOS", ids_recomendados)
+        
         except Exception as e:
             print(f"DEBUG: Erro na chamada da API: {e}")
-            ids_recomendados = []
-
+        
+        # 3. Filtra e ordena os filmes
         if ids_recomendados:
             preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids_recomendados)])
             filmes = filmes.filter(id__in=ids_recomendados).order_by(preserved_order)
         else:
+            # Fallback caso não tenha histórico ou erro na API
             filmes = Filme.objects.none()
 
     elif modo == 'avaliados':
@@ -291,11 +296,6 @@ def filme_detalhe(request, id):
                     filme=filme,
                     defaults={'nota': int(nota), 'comentario': comentario},
                 )
-                # Chama a API ao avaliar
-                try:
-                    requests.get(f"{API_BASE_URL}/recommend/{filme.id}", timeout=2)
-                except:
-                    pass
 
         elif acao == 'status':
             status = request.POST.get('status')
@@ -518,9 +518,6 @@ def perfil(request):
 
 @login_required
 def favoritar(request):
-    # DEBUG: O que o Django está recebendo?
-    print(f"DEBUG: Método da requisição: {request.method}")
-    print(f"DEBUG: Conteúdo do POST: {request.POST}")
     if request.method == "POST" and "favoritar" in request.POST:
         user = request.user
         valor = request.POST.get('favoritar', '')
