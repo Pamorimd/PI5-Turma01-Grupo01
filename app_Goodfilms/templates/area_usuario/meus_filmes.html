@@ -1,0 +1,265 @@
+{% extends "area_usuario/base.html" %}
+{% load static %}
+
+{% block title %}Meus Filmes - Goodfilms{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --cine-bg: #e9f1ff;
+    --cine-panel: #f8fbff;
+    --cine-surface: #ffffff;
+    --cine-primary: #4a84d7;
+    --cine-primary-dark: #2e5d9d;
+    --cine-text: #193357;
+    --cine-muted: #6a7e9c;
+    --cine-border: #cddcf3;
+    --cine-shadow: 0 16px 34px rgba(45, 93, 161, 0.12);
+  }
+
+  .main-content {
+    margin-left: 300px;
+    min-height: 100vh;
+    padding: 26px 28px 30px;
+    background: transparent;
+  }
+
+  .cine-panel {
+    border: 1px solid var(--cine-border);
+    border-radius: 18px;
+    background: var(--cine-panel);
+    padding: 22px;
+    box-shadow: var(--cine-shadow);
+  }
+
+  .cine-panel h1 {
+    margin: 0 0 14px;
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: clamp(1.55rem, 1.8vw, 2.2rem);
+    color: #0f2a4d;
+  }
+
+  .cine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .cine-card {
+    border: 1px solid #d7e4f7;
+    border-radius: 14px;
+    background: var(--cine-surface);
+    box-shadow: 0 10px 25px rgba(45, 93, 161, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cine-card-body {
+    padding: 18px 14px 14px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .cine-card-title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .cine-card-meta {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--cine-muted);
+  }
+
+  .cine-card-actions {
+    padding: 0 14px 14px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .cine-btn-primary,
+  .cine-btn-secondary {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #a8c3eb;
+    padding: 9px 12px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .cine-btn-primary {
+    color: #0f3f79;
+    background: #d6e8ff;
+  }
+
+  .cine-btn-secondary {
+    color: #42587c;
+    background: #eff5ff;
+  }
+
+  .cine-empty {
+    border: 1px dashed #b8cdee;
+    border-radius: 14px;
+    background: #eff5ff;
+    padding: 28px;
+    text-align: center;
+  }
+
+  .cine-empty p {
+    margin-bottom: 12px;
+    color: var(--cine-muted);
+  }
+
+  .cine-search-form {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cine-surface);
+    border: 1px solid var(--cine-border);
+    border-radius: 12px;
+    padding: 6px 8px 6px 14px;
+    margin-bottom: 20px;
+  }
+
+  .cine-search-form input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.95rem;
+    color: var(--cine-text);
+    background: transparent;
+  }
+
+  .cine-search-form button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    color: var(--cine-primary-dark);
+    background: #e6f0ff;
+  }
+
+  .cine-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .cine-pagination ul {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .cine-pagination li {
+    min-width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #f5f8ff;
+    color: #42587c;
+    font-weight: 700;
+  }
+
+  .cine-pagination li a {
+    color: inherit;
+    text-decoration: none;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cine-pagination li.active {
+    background: #4a84d7;
+    color: white;
+  }
+
+  .cine-pagination li.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  @media (max-width: 992px) {
+    .main-content {
+      margin-left: 0;
+      padding: 16px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cine-panel">
+  <h1>Meus Filmes</h1>
+
+  <form method="get" class="cine-search-form">
+    <input type="text" name="q" placeholder="Buscar filme" value="{{ q }}">
+    <button type="submit" aria-label="Buscar">
+      <i class="fas fa-search"></i>
+    </button>
+  </form>
+
+  <div class="cine-grid">
+    {% for filme in filmes_meus %}
+    <article class="cine-card">
+      <div class="cine-card-body">
+        <h3 class="cine-card-title">{{ filme.titulo }}</h3>
+        <p class="cine-card-meta">
+          {{ filme.genero|default:"Gênero indefinido" }}
+          {% if filme.ano_lancamento %} • {{ filme.ano_lancamento }}{% endif %}
+        </p>
+      </div>
+
+      <div class="cine-card-actions">
+        <a href="{% url 'filme_detalhe' id=filme.id %}" class="cine-btn-primary">Ver detalhes</a>
+        <a href="{% url 'editar_filme' id=filme.id %}" class="cine-btn-secondary">Editar</a>
+      </div>
+    </article>
+    {% empty %}
+    <div class="cine-empty" style="grid-column: 1 / -1;">
+      <p>Você ainda não cadastrou nenhum filme.</p>
+      <a href="{% url 'cadastro_de_filme' %}" class="cine-btn-primary">Adicionar filme</a>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="cine-pagination" aria-label="Paginação de filmes">
+    <ul>
+      {% if page_obj.has_previous %}
+      <li><a href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+      {% else %}
+      <li class="disabled">&laquo;</li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+          <li class="active">{{ num }}</li>
+        {% else %}
+          <li><a href="?{% if q %}q={{ q }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <li><a href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a></li>
+      {% else %}
+      <li class="disabled">&raquo;</li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}
