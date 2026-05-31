@@ -1,0 +1,712 @@
+{% extends "area_usuario/base.html" %}
+
+{% block title %}{{ filme.titulo }} - GoodFilms{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gf-bg: #f3f7ff;
+    --gf-surface: #ffffff;
+    --gf-blue-950: #031f55;
+    --gf-blue-900: #082b73;
+    --gf-blue-700: #0f57d6;
+    --gf-blue-100: #eaf2ff;
+    --gf-border: #c9daf7;
+    --gf-soft-border: #dfe8f8;
+    --gf-text: #07183c;
+    --gf-muted: #536991;
+    --gf-yellow: #ffd331;
+    --gf-star: #f8bf10;
+    --gf-shadow: 0 18px 42px rgba(20, 50, 98, 0.12);
+  }
+
+  body {
+    min-height: 100vh;
+    color: var(--gf-text);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.9), transparent 32%),
+      linear-gradient(135deg, #f8fbff 0%, var(--gf-bg) 46%, #edf4ff 100%) !important;
+    font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+  }
+
+  .main-content {
+    min-height: 100vh;
+    margin-left: 300px;
+    padding: 24px 34px 34px;
+    background: transparent !important;
+  }
+
+  .cine-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    width: 280px;
+    min-height: 100vh;
+    padding: 44px 20px 28px;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px),
+      linear-gradient(180deg, var(--gf-blue-950) 0%, var(--gf-blue-900) 46%, #06256b 100%);
+    background-size: 30px 30px, auto;
+    box-shadow: 14px 0 36px rgba(5, 30, 86, 0.18);
+  }
+
+  .cine-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 12px 44px;
+    color: #ffffff;
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.68rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .cine-brand i {
+    font-size: 1.45rem;
+  }
+
+  .cine-brand span span {
+    color: var(--gf-yellow);
+  }
+
+  .cine-nav {
+    display: grid;
+    gap: 18px;
+  }
+
+  .cine-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 56px;
+    padding: 0 18px;
+    color: rgba(255, 255, 255, 0.92);
+    border-radius: 8px;
+    font-size: 1.02rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+  }
+
+  .cine-nav-link i {
+    width: 22px;
+    color: currentColor;
+    font-size: 1.15rem;
+    text-align: center;
+  }
+
+  .cine-nav-link:hover,
+  .cine-nav-link.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #1d70f0 0%, #0e4fc7 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 14px 28px rgba(0, 18, 66, 0.2);
+    transform: translateX(2px);
+  }
+
+  .cine-sidebar-divider {
+    height: 1px;
+    margin: 36px 10px 26px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .cine-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 58px;
+    color: #051841;
+    background: linear-gradient(180deg, #ffdf4c 0%, var(--gf-yellow) 60%, #f5bf14 100%);
+    border: 1px solid rgba(255, 238, 156, 0.8);
+    border-radius: 8px;
+    font-size: 1.02rem;
+    font-weight: 900;
+    text-decoration: none;
+    box-shadow: 0 16px 28px rgba(0, 20, 72, 0.24);
+  }
+
+  .cine-add-btn:hover,
+  .cine-add-btn:focus {
+    color: #051841;
+    transform: translateY(-2px);
+  }
+
+  .detail-shell {
+    display: grid;
+    gap: 14px;
+    max-width: 1120px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 8px;
+    color: #1455c8;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .detail-panel,
+  .mine-panel {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(223, 232, 248, 0.96);
+    border-radius: 8px;
+    box-shadow: var(--gf-shadow);
+  }
+
+  .detail-panel {
+    padding: 28px;
+  }
+
+  .detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .detail-title {
+    margin: 0 0 14px;
+    color: var(--gf-text);
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: clamp(1.7rem, 2.3vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.12;
+  }
+
+  .detail-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 14px;
+    color: #0c4fc9;
+    background: #edf5ff;
+    border: 1px solid #b8d0f6;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    font-weight: 900;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .detail-chips,
+  .rating-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .detail-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    color: #255ba8;
+    background: #edf5ff;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .detail-chip.success {
+    color: #0d7643;
+    background: #dff6e9;
+  }
+
+  .rating-summary {
+    margin-top: 16px;
+  }
+
+  .stars {
+    position: relative;
+    display: inline-block;
+    color: #d6e0f1;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .stars-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    overflow: hidden;
+    color: var(--gf-star);
+    white-space: nowrap;
+  }
+
+  .rating-value {
+    color: var(--gf-text);
+    font-weight: 900;
+  }
+
+  .rating-count,
+  .muted-text {
+    color: var(--gf-muted);
+    font-weight: 600;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.88fr) minmax(340px, 1.12fr);
+    gap: 28px;
+    align-items: stretch;
+  }
+
+  .info-list {
+    display: grid;
+  }
+
+  .info-item {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gf-soft-border);
+  }
+
+  .info-item:last-child {
+    border-bottom: none;
+  }
+
+  .info-icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    color: #1455c8;
+    background: var(--gf-blue-100);
+    border-radius: 8px;
+  }
+
+  .info-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #173766;
+    font-size: 0.86rem;
+    font-weight: 900;
+  }
+
+  .info-value {
+    color: var(--gf-muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .synopsis-card {
+    min-height: 250px;
+    padding: 22px;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid var(--gf-soft-border);
+    border-radius: 8px;
+  }
+
+  .synopsis-card h2,
+  .mine-panel h2 {
+    margin: 0 0 14px;
+    color: #173766;
+    font-family: "Sora", "Segoe UI", sans-serif;
+    font-size: 1.08rem;
+    font-weight: 800;
+  }
+
+  .synopsis-card p {
+    margin: 0;
+    color: var(--gf-muted);
+    font-size: 0.94rem;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  .mine-panel {
+    padding: 22px;
+  }
+
+  .mine-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.82fr 0.92fr;
+    gap: 22px;
+  }
+
+  .mine-card {
+    min-width: 0;
+    padding-right: 20px;
+    border-right: 1px solid var(--gf-soft-border);
+  }
+
+  .mine-card:last-child {
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .mine-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 12px;
+    color: #173766;
+    font-size: 0.92rem;
+    font-weight: 900;
+  }
+
+  .rate-stars {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .rate-stars input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .rate-stars label {
+    color: #cbd8ef;
+    cursor: pointer;
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+
+  .rate-stars input:checked ~ label,
+  .rate-stars label:hover,
+  .rate-stars label:hover ~ label {
+    color: var(--gf-star);
+  }
+
+  .score-number {
+    margin-left: 8px;
+    color: var(--gf-muted);
+    font-weight: 900;
+  }
+
+  .comment-box,
+  .status-select {
+    width: 100%;
+    color: var(--gf-text);
+    background: #ffffff;
+    border: 1px solid var(--gf-border);
+    border-radius: 8px;
+    outline: none;
+  }
+
+  .comment-box {
+    min-height: 82px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    resize: vertical;
+  }
+
+  .status-select {
+    min-height: 42px;
+    padding: 0 12px;
+    font-weight: 700;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    margin-top: 12px;
+    padding: 0 14px;
+    color: #07388e;
+    background: #edf5ff;
+    border: 1px solid #b8d0f6;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .favorite-copy {
+    min-height: 44px;
+    margin: 0;
+    color: var(--gf-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .meta-footer {
+    margin: 14px 0 0;
+    color: var(--gf-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 980px) {
+    .detail-grid,
+    .mine-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mine-card {
+      padding: 0 0 18px;
+      border-right: none;
+      border-bottom: 1px solid var(--gf-soft-border);
+    }
+
+    .mine-card:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .main-content {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .cine-sidebar {
+      position: static;
+      width: auto;
+      min-height: auto;
+      padding: 24px 16px;
+    }
+
+    .cine-brand {
+      margin-bottom: 24px;
+    }
+
+    .cine-nav {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .main-content {
+      padding: 16px;
+    }
+
+    .cine-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-panel,
+    .mine-panel {
+      padding: 18px 16px;
+    }
+
+    .detail-header {
+      display: grid;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<aside class="cine-sidebar">
+  <a href="{% url 'home' %}" class="cine-brand" aria-label="GoodFilms">
+    <i class="fas fa-clapperboard" aria-hidden="true"></i>
+    <span>Good<span>Films</span></span>
+  </a>
+
+  <nav class="cine-nav" aria-label="Menu principal">
+    <a href="{% url 'home' %}" class="cine-nav-link active">
+      <i class="fas fa-film" aria-hidden="true"></i>
+      <span>Meus Filmes</span>
+    </a>
+    <a href="{% url 'home' %}?modo=recomendacoes" class="cine-nav-link">
+      <i class="far fa-lightbulb" aria-hidden="true"></i>
+      <span>Recomenda&ccedil;&otilde;es</span>
+    </a>
+    <a href="{% url 'home' %}?modo=avaliados" class="cine-nav-link">
+      <i class="fas fa-star" aria-hidden="true"></i>
+      <span>Avaliados</span>
+    </a>
+    <a href="{% url 'home' %}?modo=favoritos" class="cine-nav-link">
+      <i class="fas fa-heart" aria-hidden="true"></i>
+      <span>Favoritos</span>
+    </a>
+  </nav>
+
+  <div class="cine-sidebar-divider" aria-hidden="true"></div>
+
+  <a href="{% url 'cadastro_de_filme' %}" class="cine-add-btn">
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    <span>Adicionar filme</span>
+  </a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<div class="detail-shell">
+  <a href="{% url 'home' %}" class="back-link">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+    Voltar
+  </a>
+
+  <section class="detail-panel">
+    <header class="detail-header">
+      <div>
+        <h1 class="detail-title">{{ filme.titulo }}</h1>
+        <div class="detail-chips">
+          <span class="detail-chip">{{ filme.ano_lancamento|default:"Ano nao informado" }}</span>
+          <span class="detail-chip">{{ duracao_label }}</span>
+          <span class="detail-chip success">{{ filme.classificacao|default:"Livre" }}</span>
+        </div>
+        <div class="rating-summary">
+          <span class="stars" aria-hidden="true">
+            &#9733;&#9733;&#9733;&#9733;&#9733;
+            <span class="stars-fill" style="width: {{ media_percentual|floatformat:0 }}%;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          </span>
+          <span class="rating-value">{{ media_nota|floatformat:1 }}</span>
+          <span class="rating-count">({{ total_avaliacoes }} avalia&ccedil;&otilde;es)</span>
+        </div>
+      </div>
+
+      <a href="{% url 'editar_filme' id=filme.id %}" class="detail-edit-btn">
+        <i class="fas fa-pen" aria-hidden="true"></i>
+        Editar informa&ccedil;&otilde;es
+      </a>
+    </header>
+
+    <div class="detail-grid">
+      <div class="info-list">
+        <div class="info-item">
+          <span class="info-icon"><i class="fas fa-tag" aria-hidden="true"></i></span>
+          <div>
+            <span class="info-label">G&ecirc;nero</span>
+            <span class="info-value">{{ filme.genero|default:"Genero nao informado" }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="info-icon"><i class="fas fa-user-tie" aria-hidden="true"></i></span>
+          <div>
+            <span class="info-label">Diretor</span>
+            <span class="info-value">{{ filme.diretor|default:"Diretor nao informado" }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="info-icon"><i class="fas fa-calendar-days" aria-hidden="true"></i></span>
+          <div>
+            <span class="info-label">Ano de lan&ccedil;amento</span>
+            <span class="info-value">{{ filme.ano_lancamento|default:"Ano nao informado" }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="info-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></span>
+          <div>
+            <span class="info-label">Classifica&ccedil;&atilde;o</span>
+            <span class="info-value">{{ filme.classificacao|default:"Livre" }}</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="synopsis-card">
+        <h2>Sinopse</h2>
+        <p>
+          {% if filme.sinopse %}
+            {{ filme.sinopse|linebreaksbr }}
+          {% else %}
+            Sinopse n&atilde;o informada.
+          {% endif %}
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="mine-panel">
+    <h2>Minhas informa&ccedil;&otilde;es</h2>
+
+    <div class="mine-grid">
+      <form class="mine-card" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="acao" value="avaliar">
+        <div class="mine-title">
+          <i class="far fa-star" aria-hidden="true"></i>
+          Minha nota
+        </div>
+        <div>
+          <span class="rate-stars" aria-label="Minha nota">
+            <input type="radio" id="nota5" name="nota" value="5" {% if minha_avaliacao.nota == 5 %}checked{% endif %}>
+            <label for="nota5" title="5 estrelas">&#9733;</label>
+            <input type="radio" id="nota4" name="nota" value="4" {% if minha_avaliacao.nota == 4 %}checked{% endif %}>
+            <label for="nota4" title="4 estrelas">&#9733;</label>
+            <input type="radio" id="nota3" name="nota" value="3" {% if minha_avaliacao.nota == 3 %}checked{% endif %}>
+            <label for="nota3" title="3 estrelas">&#9733;</label>
+            <input type="radio" id="nota2" name="nota" value="2" {% if minha_avaliacao.nota == 2 %}checked{% endif %}>
+            <label for="nota2" title="2 estrelas">&#9733;</label>
+            <input type="radio" id="nota1" name="nota" value="1" {% if minha_avaliacao.nota == 1 %}checked{% endif %}>
+            <label for="nota1" title="1 estrela">&#9733;</label>
+          </span>
+          <span class="score-number">{% if minha_avaliacao %}{{ minha_avaliacao.nota|floatformat:1 }}{% else %}0,0{% endif %}</span>
+        </div>
+        <textarea class="comment-box" name="comentario" placeholder="Comentario opcional">{{ minha_avaliacao.comentario|default_if_none:'' }}</textarea>
+        <button class="action-btn" type="submit">
+          <i class="fas fa-check" aria-hidden="true"></i>
+          Salvar avalia&ccedil;&atilde;o
+        </button>
+      </form>
+
+      <div class="mine-card">
+        <div class="mine-title">
+          <i class="{% if is_favorito %}fas{% else %}far{% endif %} fa-heart" aria-hidden="true"></i>
+          Favorito
+        </div>
+        <p class="favorite-copy">
+          {% if is_favorito %}
+            Filme adicionado aos favoritos.
+          {% else %}
+            Filme ainda n&atilde;o foi adicionado aos favoritos.
+          {% endif %}
+        </p>
+        <form method="post" action="{% url 'favoritar' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'filme_detalhe' id=filme.id %}">
+          {% if is_favorito %}
+            <button class="action-btn" type="submit" name="favoritar" value="{{ filme.id }},False">
+              <i class="far fa-heart" aria-hidden="true"></i>
+              Remover favorito
+            </button>
+          {% else %}
+            <button class="action-btn" type="submit" name="favoritar" value="{{ filme.id }},True">
+              <i class="fas fa-heart" aria-hidden="true"></i>
+              Favoritar
+            </button>
+          {% endif %}
+        </form>
+      </div>
+
+      <form class="mine-card" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="acao" value="status">
+        <div class="mine-title">
+          <i class="fas fa-clapperboard" aria-hidden="true"></i>
+          Status
+        </div>
+        <select class="status-select" name="status">
+          <option value="nao_assistido" {% if not is_assistido %}selected{% endif %}>N&atilde;o assistido</option>
+          <option value="assistido" {% if is_assistido %}selected{% endif %}>Assistido</option>
+        </select>
+        <button class="action-btn" type="submit">
+          <i class="fas fa-check" aria-hidden="true"></i>
+          Salvar status
+        </button>
+      </form>
+    </div>
+
+    <p class="meta-footer">Adicionado em {{ filme.data_cadastro|date:"d/m/Y" }}</p>
+  </section>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

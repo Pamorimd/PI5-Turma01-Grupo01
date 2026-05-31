@@ -1,0 +1,57 @@
+# ==============================================================================
+# Python - Caches e Arquivos Compilados
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ==============================================================================
+# Ambientes Virtuais (VENV)
+# ==============================================================================
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ==============================================================================
+# Django - Arquivos Específicos do Framework
+# ==============================================================================
+# Logs do sistema
+*.log
+
+# Arquivos locais de configuração (onde ficam chaves secretas)
+local_settings.py
+.env
+*.env
+
+# Banco de dados local (SQLite) - Nunca suba o banco de dados de desenvolvimento
+db.sqlite3
+db.sqlite3-journal
+
+# Pastas de arquivos estáticos/mídia geradas pelo Django
+media/
+staticfiles/
+
+# ==============================================================================
+# IDEs e Editores (VS Code, PyCharm, etc.)
+# ==============================================================================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# ==============================================================================
+# Sistema Operacional (Arquivos ocultos inúteis)
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
