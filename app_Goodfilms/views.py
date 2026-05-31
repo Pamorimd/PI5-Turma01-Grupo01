@@ -121,7 +121,7 @@ def amigos(request):
 def home_user(request):
     query = request.GET.get('q', '').strip()
     modo = request.GET.get('modo', 'meus-filmes').strip()
-    status_filtro = request.GET.get('status', 'todos').strip()
+    status_filtro = request.GET.get('status', 'ja-assisti').strip()
     ordenacao = request.GET.get('ordem', '-data_cadastro').strip()
     favoritos_ids = _get_favoritos_ids(request.user)
     assistidos_ids = set(Filme_assistido.objects.filter(user=request.user).values_list('filme_id', flat=True))
